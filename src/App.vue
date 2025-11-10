@@ -1232,7 +1232,7 @@ const createMonsterAndStartBattle = () => {
   isSubmittingEvent.value = true // ボタンを非表示にする
 
   const dominantEmotions = Object.entries(emotions.value)
-    .filter(([key, value]) => value >= 60)
+    .filter(([, value]) => value >= 60)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
 
