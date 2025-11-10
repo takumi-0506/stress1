@@ -488,6 +488,8 @@ const monsterImages = {
   default: monsteranger, // 汎用的なモンスター画像
 }
 
+const newPlayerName = ref('')
+
 // --- ロード & セーブ機能 ---
 const GAME_DATA_KEY = 'myAdventureGameData'
 
@@ -509,12 +511,24 @@ const loadGame = () => {
   if (savedData) {
     try {
       const parsedData = JSON.parse(savedData)
+      // 【変更】ロード時に name が存在するかチェック
+      if (parsedData.playerBaseStats && parsedData.playerBaseStats.name) {
+        playerBaseStats.value = { ...playerBaseStats.value, ...parsedData.playerBaseStats }
+      }
       // データが存在する場合のみ復元
       if (parsedData.playerBaseStats) playerBaseStats.value = parsedData.playerBaseStats
       if (parsedData.playerInventory) playerInventory.value = parsedData.playerInventory
       if (parsedData.goalList) goalList.value = parsedData.goalList
       if (parsedData.memoryLog) memoryLog.value = parsedData.memoryLog
       if (parsedData.achievements) achievements.value = parsedData.achievements
+
+      // データがあり、名前も設定されていればホームへ
+      if (playerBaseStats.value.name) {
+        goToScreen('home')
+      } else {
+        // データはあるが名前がない（古いセーブデータ）の場合
+        goToScreen('nameInput')
+      }
     } catch (e) {
       console.error('セーブデータの読み込みに失敗しました:', e)
       localStorage.removeItem(GAME_DATA_KEY) // 壊れたデータを削除
@@ -1192,6 +1206,15 @@ const returnToCommandSelect = () => {
   selectedSpell.value = null
 }
 
+const setPlayerName = () => {
+  if (!newPlayerName.value.trim()) {
+    alert('名前を入力してください。')
+    return
+  }
+  playerBaseStats.value.name = newPlayerName.value.trim()
+  goToScreen('home') // ホーム画面へ
+}
+
 const createMonsterAndStartBattle = () => {
   /*  if (!eventName.value.trim()) {
     alert('出来事の名前を入力してください。')
@@ -1343,6 +1366,7 @@ const createMonsterAndStartBattle = () => {
     currentAdventure.value.emotions = { ...emotions.value }
   }
   player.value = {
+    name: playerBaseStats.value.name, // 基本ステータスの名前を参照
     ...playerBaseStats.value,
     hp: playerBaseStats.value.maxHp,
     mp: playerBaseStats.value.maxMp, // MPを初期化
@@ -1948,14 +1972,20 @@ const checkWinner = () => {
   <div id="app-wrapper">
     <!-- <main class="screen-content"> -->
     <div v-if="achievementToast" class="achievement-toast">🏆 実績解除: {{ achievementToast }}</div>
+
     <div v-if="currentScreen === 'login'" class="screen login-screen">
       <h1>ログイン画面</h1>
       <label class="login-name">キャラクター名</label>
       <input id="login-text" />
       <!-- <button @click="a">作成</button> -->
       <!-- <input id="goal-text" type="text" v-model="newGoal.text" placeholder="例: 10分散歩する" /> -->
-
-      <button @click="currentScreen = 'home'">ボタン</button>
+      <form @submit.prevent="setPlayerName" class="name-input-form">
+        <div class="form-group">
+          <label for="player-name">名前</label>
+          <input type="text" id="player-name" v-model="newPlayerName" placeholder="太郎" />
+        </div>
+        <button type="submit" class="save-button">決定</button>
+      </form>
     </div>
     <div v-if="currentScreen === 'home'" class="screen home-screen">
       <div class="home-layout">
@@ -3813,29 +3843,24 @@ const checkWinner = () => {
   margin: 0 auto;
 }
 
-.login-screen {
-  background-color: #fff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin: 20% auto;
-  border-radius: 10px;
+/* 【追加】ロード画面のスタイル */
+.loading-screen {
+  text-align: center;
+  padding: 50px;
+  font-size: 1.2em;
+  color: #777;
 }
 
-.login-screen input {
-  width: 80%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  margin-bottom: 10px;
+/* 【追加】名前入力フォームのスタイル */
+.name-input-form {
+  max-width: 400px;
+  margin: 30px auto 0;
 }
-.login-screen button {
+.name-input-form button {
   width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  border-radius: 10px;
-  color: #fff;
-  border: none;
-  cursor: pointer;
+  padding: 15px;
+  font-size: 1.1em;
+  font-weight: bold;
 }
 
 /* 【追加】実績解除トーストのスタイル */
