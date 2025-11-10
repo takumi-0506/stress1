@@ -452,7 +452,7 @@ const positiveWords = ref([
 // const attackHistory = ref([])
 
 // 出来事の送信状態を管理
-const isSubmittingEvent = ref(false)
+const isSubmittingEvent = ref(true)
 
 // 【変更】UIの状態管理をより詳細に
 const playerActionState = ref('selecting_command') // 'selecting_command', 'inputting_attack', 'selecting_magic', 'inputting_magic', 'selecting_item'
@@ -514,6 +514,7 @@ const loadGame = () => {
       // 【変更】ロード時に name が存在するかチェック
       if (parsedData.playerBaseStats && parsedData.playerBaseStats.name) {
         playerBaseStats.value = { ...playerBaseStats.value, ...parsedData.playerBaseStats }
+        isSubmittingEvent.value = false // ボタンを非表示にする
       }
       // データが存在する場合のみ復元
       if (parsedData.playerBaseStats) playerBaseStats.value = parsedData.playerBaseStats
@@ -859,7 +860,6 @@ const finalizeAdventure = () => {
   if (currentAdventure.value) {
     currentAdventure.value.recordedDate = new Date().toISOString()
     memoryLog.value.push(currentAdventure.value)
-    console.log('1111')
 
     // 実績チェック
     // if (memoryLog.value.length >= 3) {
@@ -1974,12 +1974,10 @@ const checkWinner = () => {
     <div v-if="achievementToast" class="achievement-toast">🏆 実績解除: {{ achievementToast }}</div>
 
     <div v-if="currentScreen === 'login'" class="screen login-screen">
-      <h1>ログイン画面</h1>
-      <label class="login-name">キャラクター名</label>
-      <input id="login-text" />
+      <h1>名前登録</h1>
       <!-- <button @click="a">作成</button> -->
       <!-- <input id="goal-text" type="text" v-model="newGoal.text" placeholder="例: 10分散歩する" /> -->
-      <form @submit.prevent="setPlayerName" class="name-input-form">
+      <form @submit.prevent="setPlayerName" class="login-text">
         <div class="form-group">
           <label for="player-name">名前</label>
           <input type="text" id="player-name" v-model="newPlayerName" placeholder="太郎" />
@@ -3843,24 +3841,29 @@ const checkWinner = () => {
   margin: 0 auto;
 }
 
-/* 【追加】ロード画面のスタイル */
-.loading-screen {
-  text-align: center;
-  padding: 50px;
-  font-size: 1.2em;
-  color: #777;
+.login-screen {
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 20% auto;
+  border-radius: 10px;
 }
 
-/* 【追加】名前入力フォームのスタイル */
-.name-input-form {
-  max-width: 400px;
-  margin: 30px auto 0;
+.login-screen input {
+  width: 80%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 10px;
 }
-.name-input-form button {
+.login-screen button {
   width: 100%;
-  padding: 15px;
-  font-size: 1.1em;
-  font-weight: bold;
+  padding: 10px;
+  background-color: #007bff;
+  border-radius: 10px;
+  color: #fff;
+  border: none;
+  cursor: pointer;
 }
 
 /* 【追加】実績解除トーストのスタイル */
