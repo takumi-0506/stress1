@@ -33,7 +33,7 @@ import armond from '@/assets/nuts_almond.png'
 import herb from '@/assets/herb_tea.png'
 
 // --- 画面管理 ---
-const currentScreen = ref('home') // 'home', 'statusEdit', 'eventInput', 'battle', 'goal'
+const currentScreen = ref('login') // 'home', 'statusEdit', 'eventInput', 'battle', 'goal'
 
 // --- プレイヤーデータ ---
 const playerBaseStats = ref({
