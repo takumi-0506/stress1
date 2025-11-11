@@ -12,6 +12,8 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  base: '/stress1/',
+  base: './',
+  build: {
+    outDir: 'docs',
+  },
 })
-//aaaaaaaaaaaaaa
