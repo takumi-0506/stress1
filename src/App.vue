@@ -32,6 +32,11 @@ import soy from '@/assets/drink_tounyu2.png'
 import armond from '@/assets/nuts_almond.png'
 import herb from '@/assets/herb_tea.png'
 
+import yusya from '@/assets/yuusya_game.png'
+import yusya1 from '@/assets/game_yuusya_woman.png'
+import magicgirl from '@/assets/mahoutsukai_woman.png'
+import sizin from '@/assets/music_ginyuu_shijin.png'
+
 // --- 画面管理 ---
 const currentScreen = ref('login') // 'home', 'statusEdit', 'eventInput', 'battle', 'goal'
 
@@ -39,6 +44,7 @@ const currentScreen = ref('login') // 'home', 'statusEdit', 'eventInput', 'battl
 const playerBaseStats = ref({
   name: 'KAIT',
   // maxHp: Math.floor(Math.random() * 10),
+  avatar: '@/assets/yuusya_game.png', // デフォルトアバター
   maxHp: 100,
 
   maxMp: 10,
@@ -489,6 +495,8 @@ const monsterImages = {
 }
 
 const newPlayerName = ref('')
+const newPlayerAvatar = ref(yusya)
+const avatarOptions = ref([yusya, yusya1, magicgirl, sizin])
 
 // --- ロード & セーブ機能 ---
 const GAME_DATA_KEY = 'myAdventureGameData'
@@ -528,6 +536,7 @@ const loadGame = () => {
         goToScreen('home')
       } else {
         // データはあるが名前がない（古いセーブデータ）の場合
+        newPlayerAvatar.value = playerBaseStats.value.avatar // ロードしたアバターを選択状態に
         goToScreen('nameInput')
       }
     } catch (e) {
@@ -1212,6 +1221,8 @@ const setPlayerName = () => {
     return
   }
   playerBaseStats.value.name = newPlayerName.value.trim()
+  playerBaseStats.value.avatar = newPlayerAvatar.value // アバターを保存
+  isSubmittingEvent.value = false
   goToScreen('home') // ホーム画面へ
 }
 
@@ -1367,6 +1378,7 @@ const createMonsterAndStartBattle = () => {
   }
   player.value = {
     name: playerBaseStats.value.name, // 基本ステータスの名前を参照
+    avatar: playerBaseStats.value.avatar, // アバターを追加
     ...playerBaseStats.value,
     hp: playerBaseStats.value.maxHp,
     mp: playerBaseStats.value.maxMp, // MPを初期化
@@ -1974,7 +1986,7 @@ const checkWinner = () => {
     <div v-if="achievementToast" class="achievement-toast">🏆 実績解除: {{ achievementToast }}</div>
 
     <div v-if="currentScreen === 'login'" class="screen login-screen">
-      <h1>名前登録</h1>
+      <h1>キャラクター作成</h1>
       <!-- <button @click="a">作成</button> -->
       <!-- <input id="goal-text" type="text" v-model="newGoal.text" placeholder="例: 10分散歩する" /> -->
       <form @submit.prevent="setPlayerName" class="login-text">
@@ -1982,9 +1994,25 @@ const checkWinner = () => {
           <label for="player-name">名前</label>
           <input type="text" id="player-name" v-model="newPlayerName" placeholder="太郎" />
         </div>
+
+        <div class="form-group">
+          <label>アバター</label>
+          <div class="avatar-selector">
+            <img
+              v-for="avatarSrc in avatarOptions"
+              :key="avatarSrc"
+              :src="avatarSrc"
+              alt="アバター"
+              class="avatar-option"
+              :class="{ selected: newPlayerAvatar === avatarSrc }"
+              @click="newPlayerAvatar = avatarSrc"
+            />
+          </div>
+        </div>
         <button type="submit" class="save-button">決定</button>
       </form>
     </div>
+
     <div v-if="currentScreen === 'home'" class="screen home-screen">
       <div class="home-layout">
         <div class="home-left">
@@ -2000,7 +2028,11 @@ const checkWinner = () => {
             </li>
           </div>
           <div class="character-art">
-            <img class="placeholder-image" src="@/assets/yuusya_game.png" />
+            <img
+              class="placeholder-image"
+              src="@/assets/music_ginyuu_shijin.png
+"
+            />
           </div>
         </div>
 
@@ -3864,6 +3896,86 @@ const checkWinner = () => {
   color: #fff;
   border: none;
   cursor: pointer;
+}
+
+/* 【追加】名前入力画面のアバタースタイル */
+.avatar-selector {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+  background: #eee;
+  padding: 10px;
+  border-radius: 5px;
+}
+.avatar-option {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.avatar-option:hover {
+  transform: scale(1.1);
+}
+.avatar-option.selected {
+  border-color: #3498db;
+  box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+/* 【追加】ホーム画面のアバタースタイル */
+.home-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.home-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid #ccc;
+  margin-bottom: 10px;
+}
+.home-profile p {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* 【追加】ステータス画面のアバタースタイル */
+.status-profile {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.status-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid #ccc;
+}
+.status-profile .form-group {
+  flex-grow: 1;
+  margin-bottom: 0;
+}
+
+/* 【追加】バトル画面のアバタースタイル */
+.player-profile-battle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.battle-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #333;
+}
+.player-profile-battle h2 {
+  margin: 0;
 }
 
 /* 【追加】実績解除トーストのスタイル */
