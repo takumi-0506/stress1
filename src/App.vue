@@ -45,18 +45,18 @@ const playerBaseStats = ref({
   name: 'KAIT',
   // maxHp: Math.floor(Math.random() * 10),
   avatar: '@/assets/yuusya_game.png', // デフォルトアバター
-  maxHp: 100,
+  maxHp: 10,
 
   maxMp: 10,
-  attack: 200,
+  attack: 5,
   magicattack: 10,
   // attack: 200,
-  defense: 8,
+  defense: 5,
   magicdefense: 10,
   DEX: 80,
   evasion: 10,
   exp: 0,
-  gold: 10000,
+  gold: 0,
   count: 0,
   totalGoldSpent: 0, // 累計消費ゴールド
   battlesWon: 0,
@@ -288,11 +288,7 @@ const emotionLabels = {
 // --- 目標管理データ ---
 // 目標リストのデータ
 // goalListのデータ構造変更
-const goalList = ref([
-  { id: 1, text: '10分勉強する', exp: 8, gold: 80, completed: false, priority: 3 }, // 3:高, 2:中, 1:低
-  { id: 2, text: '10分散歩する', exp: 5, gold: 40, completed: false, priority: 2 },
-  { id: 3, text: '部屋の片づけをする', exp: 3, gold: 10, completed: false, priority: 1 },
-])
+const goalList = ref([])
 
 // 全記録を保存する配列
 const memoryLog = ref([])
@@ -318,10 +314,10 @@ const sortOrder = ref('desc') // 'desc' (高い順), 'asc' (低い順)
 const upgradeCost = {
   maxHp: 10, // 1回強化するのに20 EXP必要
   maxMp: 10,
-  attack: 1,
-  defense: 1,
-  DEX: 10,
-  evasion: 10,
+  attack: 10,
+  defense: 10,
+  DEX: 100,
+  evasion: 100,
 }
 
 // const itemCost = {
@@ -554,7 +550,7 @@ const achievements = ref({
     description: 'モンスターを初めて倒した',
     unlocked: false,
     icon: '🏆',
-    reward: 50,
+    reward: 10,
   },
   positive_warrior: {
     name: 'ポジティブ・スタート',
@@ -576,7 +572,7 @@ const achievements = ref({
     description: '目標を初めて達成した',
     unlocked: false,
     icon: '✅',
-    reward: 20,
+    reward: 10,
   },
   first_memory: {
     name: '最初の記録',
@@ -592,7 +588,7 @@ const achievements = ref({
     description: 'バトルで 5回 勝利した',
     unlocked: false,
     icon: '⚔️',
-    reward: 100,
+    reward: 30,
   },
   power_word: {
     name: 'ポジティブ・スピーカー',
@@ -606,14 +602,14 @@ const achievements = ref({
     description: 'お店で合計 500G 使った',
     unlocked: false,
     icon: '💰',
-    reward: 0,
+    reward: 30,
   },
   goal_setter: {
     name: '目標達成者',
     description: '目標を 5個 達成した',
     unlocked: false,
     icon: '🎯',
-    reward: 50,
+    reward: 30,
   },
 
   memory_collector_1: {
@@ -621,7 +617,7 @@ const achievements = ref({
     description: '記録を 3回 保存した',
     unlocked: false,
     icon: '📚',
-    reward: 50,
+    reward: 30,
   },
 
   // --- ROW 3 (Hard) ---
@@ -630,28 +626,28 @@ const achievements = ref({
     description: 'バトルで 20回 勝利した',
     unlocked: false,
     icon: '🎖️',
-    reward: 200,
+    reward: 70,
   },
   positive_master: {
     name: 'ポジティブシンキング',
     description: 'ポジティブな言葉で 30回 攻撃した',
     unlocked: false,
     icon: '💖',
-    reward: 100,
+    reward: 70,
   },
   big_spender: {
     name: 'お得意様',
     description: 'お店で合計 2000G 使った',
     unlocked: false,
     icon: '💸',
-    reward: 0,
+    reward: 70,
   },
   goal_master: {
     name: '目標達成のエキスパート',
     description: '目標を 15個 達成した',
     unlocked: false,
     icon: '🏅',
-    reward: 100,
+    reward: 70,
   },
 
   memory_collector_2: {
@@ -659,7 +655,7 @@ const achievements = ref({
     description: '記録を 10回 保存した',
     unlocked: false,
     icon: '📔',
-    reward: 150,
+    reward: 70,
   },
 
   // --- ROW 4 (Very Hard) ---
@@ -668,28 +664,28 @@ const achievements = ref({
     description: 'バトルで 50回 勝利した',
     unlocked: false,
     icon: '👑',
-    reward: 500,
+    reward: 100,
   },
   positive_legend: {
     name: 'ポジティブ・マスター',
     description: 'ポジティブな言葉で 75回 攻撃した',
     unlocked: false,
     icon: '☀️',
-    reward: 250,
+    reward: 100,
   },
   high_roller: {
     name: 'お買い物・マスター',
     description: 'お店で合計 5000G 使った',
     unlocked: false,
     icon: '💎',
-    reward: 0,
+    reward: 100,
   },
   goal_legend: {
     name: '目標・マスター',
     description: '目標を 30個 達成した',
     unlocked: false,
     icon: '📜',
-    reward: 300,
+    reward: 100,
   },
 
   memory_collector_3: {
@@ -697,7 +693,7 @@ const achievements = ref({
     description: '冒険の記録を 20回 保存した',
     unlocked: false,
     icon: '🏛️',
-    reward: 300,
+    reward: 100,
   },
 })
 // 【追加】実績解除通知用
@@ -799,6 +795,10 @@ const topPriorityGoals = computed(() => {
     .slice(0, 3) // 上位3件を取得
 })
 
+const allCompleteGoal = computed(() => {
+  return goalList.value.filter((goal) => !goal.completed)
+})
+
 // 勝利後の感情記録ポップアップ用の関数
 const handlePostBattleEmotionInput = (key, event) => {
   let value = parseInt(event.target.value, 10)
@@ -894,7 +894,7 @@ const upgradeStat = (statName) => {
     if (statName === 'maxHp') {
       tempStats.value.maxHp += 10
     } else if (statName === 'maxMp') {
-      tempStats.value.maxMp += 5
+      tempStats.value.maxMp += 10
     } else {
       tempStats.value[statName] += 1
     }
@@ -916,7 +916,7 @@ const downgradeStat = (statName) => {
     if (statName === 'maxHp') {
       tempStats.value.maxHp -= 10
     } else if (statName === 'maxMp') {
-      tempStats.value.maxMp -= 5
+      tempStats.value.maxMp -= 10
     } else {
       tempStats.value[statName] -= 1
     }
@@ -1118,9 +1118,13 @@ const openStatusEdit = () => {
 
 // --- ステータス保存 ---
 const saveStats = () => {
-  playerBaseStats.value = { ...tempStats.value }
-  goToScreen('home')
-  isSubmittingEvent.value = false // ボタンを再表示
+  if (!tempStats.value.name.trim()) {
+    alert('名前を入力してください')
+  } else {
+    playerBaseStats.value = { ...tempStats.value }
+    goToScreen('home')
+    isSubmittingEvent.value = false // ボタンを再表示
+  }
 }
 const back = () => {
   goToScreen('home')
@@ -2018,6 +2022,9 @@ const checkWinner = () => {
         <div class="home-left">
           <h3>今日の目標</h3>
           <div class="goal-highlight">
+            <span v-if="allCompleteGoal.length === 0" class="allcompletegoal"
+              >今日の目標はありません</span
+            >
             <li
               v-for="goal in topPriorityGoals"
               :key="goal.id"
@@ -2028,7 +2035,7 @@ const checkWinner = () => {
             </li>
           </div>
           <div class="character-art">
-            <img class="placeholder-image" src="yusya" />
+            <img class="placeholder-image" :src="playerBaseStats.avatar" />
           </div>
         </div>
 
@@ -2122,7 +2129,7 @@ const checkWinner = () => {
         <input type="text" id="stat-name" v-model="tempStats.name" />
       </div>
       <div class="form-group">
-        <label for="stat-hp">最大HP</label>
+        <label for="stat-hp">最大HP (必要EXP:10)</label>
         <input type="number" v-model.number="tempStats.maxHp" readonly />
         <button
           v-if="tempStats.exp >= upgradeCost.maxHp"
@@ -2141,7 +2148,7 @@ const checkWinner = () => {
       </div>
 
       <div class="form-group">
-        <label for="stat-mp">最大MP</label>
+        <label for="stat-mp">最大MP (必要EXP:10)</label>
         <input type="number" v-model.number="tempStats.maxMp" readonly />
         <button
           v-if="tempStats.exp >= upgradeCost.maxMp"
@@ -2160,7 +2167,7 @@ const checkWinner = () => {
       </div>
 
       <div class="form-group">
-        <label for="stat-attack">攻撃力</label>
+        <label for="stat-attack">攻撃力 (必要EXP:10)</label>
         <input type="number" v-model.number="tempStats.attack" readonly />
         <button
           v-if="tempStats.exp >= upgradeCost.attack"
@@ -2178,7 +2185,7 @@ const checkWinner = () => {
         </button>
       </div>
       <div class="form-group">
-        <label for="stat-defense">防御力</label>
+        <label for="stat-defense">防御力 (必要EXP:10)</label>
         <input type="number" v-model.number="tempStats.defense" readonly />
         <button
           v-if="tempStats.exp >= upgradeCost.defense"
@@ -2197,7 +2204,7 @@ const checkWinner = () => {
       </div>
 
       <div class="form-group">
-        <label for="stat-DEX">命中率</label>
+        <label for="stat-DEX">命中率 (必要EXP:100)</label>
         <input type="number" v-model.number="tempStats.DEX" readonly />
         <button
           v-if="tempStats.exp >= upgradeCost.DEX"
@@ -2212,7 +2219,7 @@ const checkWinner = () => {
       </div>
 
       <div class="form-group">
-        <label for="stat-evasion">回避率</label>
+        <label for="stat-evasion">回避率 (必要EXP:100)</label>
         <input type="number" v-model.number="tempStats.evasion" readonly />
         <button
           v-if="tempStats.exp >= upgradeCost.evasion"
@@ -2666,10 +2673,11 @@ const checkWinner = () => {
 /* --- ホーム画面 --- */
 .home-screen {
   /* background-color: #fff; */
-  position: relative;
+  /* position: relative; */
 }
 .home-layout {
   display: flex;
+
   /* width: 100%; */
   height: 800px;
   background-image: url('@/assets/bg_natural_sougen.jpg');
@@ -2677,10 +2685,12 @@ const checkWinner = () => {
 }
 .home-left {
   flex: 2;
+  position: relative;
 }
 .home-right {
   flex: 1;
 }
+
 .goal-highlight {
   background-color: #fafafa;
   border: 1px solid #eee;
@@ -2689,14 +2699,19 @@ const checkWinner = () => {
   margin-left: 10px;
   margin-bottom: 20px;
 }
+
 .character-art .placeholder-image {
+  position: absolute;
+
   display: flex;
   justify-content: center;
   align-items: center;
+  top: 200px;
   width: 500px;
   height: 500px;
   /* background-color: #eee; */
   border-radius: 8px;
+
   color: #aaa;
 }
 
@@ -3280,6 +3295,7 @@ const checkWinner = () => {
 }
 .goal-screen {
   background-color: #f9f9f9;
+  padding-bottom: 60px;
 }
 .divider {
   border: 0;
