@@ -2028,11 +2028,7 @@ const checkWinner = () => {
             </li>
           </div>
           <div class="character-art">
-            <img
-              class="placeholder-image"
-              src="@/assets/music_ginyuu_shijin.png
-"
-            />
+            <img class="placeholder-image" src="yusya" />
           </div>
         </div>
 
