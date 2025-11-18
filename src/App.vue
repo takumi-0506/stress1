@@ -46,14 +46,13 @@ const playerBaseStats = ref({
   // maxHp: Math.floor(Math.random() * 10),
   avatar: '@/assets/yuusya_game.png', // デフォルトアバター
   maxHp: 10,
-
   maxMp: 10,
-  attack: 5,
+  // attack: 5,
   magicattack: 10,
-  // attack: 200,
+  attack: 200,
   defense: 5,
   magicdefense: 10,
-  DEX: 80,
+  DEX: 300,
   evasion: 10,
   exp: 0,
   gold: 0,
@@ -67,19 +66,7 @@ const player = ref({}) // バトル中のインスタンス
 const tempStats = ref({}) // ステータス編集用の一時データ
 
 // 【追加】プレイヤーの所持アイテム
-const playerInventory = ref([
-  {
-    id: 1,
-    name: 'チョコレート',
-    quantity: 1,
-    price: 20,
-    effect: 'heal',
-    power: 40,
-    description: 'HPを40回復する',
-    relaxingeffect: 'リラックス効果のあるポリフェノールが含まれている。',
-    image: choco,
-  },
-])
+const playerInventory = ref([])
 // プレイヤーが使える魔法
 const playerMagics = ref([
   {
@@ -87,7 +74,7 @@ const playerMagics = ref([
     name: 'リラクゼーション',
     mpCost: 10,
     effect: 'damage',
-    power: 25,
+    power: 25, //+ playerBaseStats.value.magicattack,
     element: 'fire',
     description: '心身の緊張状態を緩め、ストレスを軽減させる方法',
   },
@@ -343,6 +330,8 @@ const didPlayerWin = ref(false)
 
 // ポップアップ表示用の状態
 const isEmotionLogVisible = ref(false)
+// ログのオン／オフ
+const Logmanual = ref(false)
 
 // const positiveWords = ref(['勇気', '勝つ', '未来', '信じる', '友達', '守る', '笑顔', '相談'])
 
@@ -505,6 +494,9 @@ const saveGame = () => {
     goalList: goalList.value,
     memoryLog: memoryLog.value,
     achievements: achievements.value,
+    // 【追加】中断している冒険データも保存する
+    currentAdventure: currentAdventure.value,
+    enemies: enemies.value, // 敵の状態も保存
   }
   localStorage.setItem(GAME_DATA_KEY, JSON.stringify(dataToSave))
 }
@@ -527,14 +519,18 @@ const loadGame = () => {
       if (parsedData.memoryLog) memoryLog.value = parsedData.memoryLog
       if (parsedData.achievements) achievements.value = parsedData.achievements
 
+      if (parsedData.currentAdventure) currentAdventure.value = parsedData.currentAdventure
+      if (parsedData.enemies) enemies.value = parsedData.enemies
+
       // データがあり、名前も設定されていればホームへ
       if (playerBaseStats.value.name) {
         goToScreen('home')
-      } else {
-        // データはあるが名前がない（古いセーブデータ）の場合
-        newPlayerAvatar.value = playerBaseStats.value.avatar // ロードしたアバターを選択状態に
-        goToScreen('nameInput')
       }
+      // } else {
+      //   // データはあるが名前がない（古いセーブデータ）の場合
+      //   newPlayerAvatar.value = playerBaseStats.value.avatar // ロードしたアバターを選択状態に
+      //   goToScreen('nameInput')
+      // }
     } catch (e) {
       console.error('セーブデータの読み込みに失敗しました:', e)
       localStorage.removeItem(GAME_DATA_KEY) // 壊れたデータを削除
@@ -700,7 +696,7 @@ const achievements = ref({
 const achievementToast = ref(null)
 
 watch(
-  [playerBaseStats, playerInventory, goalList, memoryLog, achievements],
+  [playerBaseStats, playerInventory, goalList, memoryLog, achievements, currentAdventure, enemies],
   () => {
     saveGame()
   },
@@ -819,6 +815,18 @@ const savePostBattleEmotions = () => {
   // 本来はここでデータベースなどに保存する
   // isEmotionLogVisible.value = false // ポップアップを閉じる
 
+  if (
+    postBattleEmotions.value.joy === 0 &&
+    postBattleEmotions.value.surprise === 0 &&
+    postBattleEmotions.value.disgust === 0 &&
+    postBattleEmotions.value.sorrow === 0 &&
+    postBattleEmotions.value.anxiety === 0 &&
+    postBattleEmotions.value.anger === 0
+  ) {
+    alert('今の感情を1つ以上入力してください')
+    return
+  }
+
   // 【変更】現在の冒険データに勝利後の感情を記録
   if (currentAdventure.value) {
     currentAdventure.value.postBattleEmotions = { ...postBattleEmotions.value }
@@ -881,6 +889,7 @@ const finalizeAdventure = () => {
     // バトル後のアイテム状態を永続データに反映
     // playerInventory.value = JSON.parse(JSON.stringify(player.value.inventory))
   }
+  tab.value = true
   currentAdventure.value = null
   isSubmittingEvent.value = false // ボタンを再表示
   goToScreen('home')
@@ -1191,11 +1200,11 @@ const closeMemoryPopup = () => {
 //   // プレースホルダーを返す（画像インポートがコメントアウトされているため）
 //   // return null;
 // }
-
 // ログ表示を手動で切り替える関数
 const toggleLogView = () => {
   if (isBattleOver.value) return // バトル終了後は切り替え不可
   isLogVisible.value = !isLogVisible.value
+  Logmanual.value = true
 
   // 【変更】ログ表示に切り替わった場合もスクロール
   // if (isLogVisible.value) {
@@ -1230,6 +1239,15 @@ const setPlayerName = () => {
   goToScreen('home') // ホーム画面へ
 }
 
+const tab = ref(true)
+
+const retreatToHome = () => {
+  // 冒険データ(currentAdventure)と敵データ(enemies)は保持したままホームに戻る
+  isSubmittingEvent.value = false
+  tab.value = false
+  goToScreen('home')
+}
+
 const createMonsterAndStartBattle = () => {
   /*  if (!eventName.value.trim()) {
     alert('出来事の名前を入力してください。')
@@ -1262,117 +1280,150 @@ const createMonsterAndStartBattle = () => {
 
   // 【変更】モンスター生成ロジック
   // const createMonsterAndStartBattle = () => {
-  if (!eventName.value.trim()) {
+  if (
+    !eventName.value.trim() &&
+    emotions.value.joy === 0 &&
+    emotions.value.surprise === 0 &&
+    emotions.value.disgust === 0 &&
+    emotions.value.sorrow === 0 &&
+    emotions.value.anxiety === 0 &&
+    emotions.value.anger === 0 &&
+    !thoughts.value.trim()
+  ) {
+    alert('出来事の名前とその時の感情と考え・思ったことを入力してください。')
+    return
+  } else if (!thoughts.value.trim()) {
+    alert('考え・思ったことを入力してください。')
+    return
+  } else if (!eventName.value.trim()) {
     alert('出来事の名前を入力してください。')
+    return
+  } else if (
+    emotions.value.joy === 0 &&
+    emotions.value.surprise === 0 &&
+    emotions.value.disgust === 0 &&
+    emotions.value.sorrow === 0 &&
+    emotions.value.anxiety === 0 &&
+    emotions.value.anger === 0
+  ) {
+    alert('その時の感情を1つ以上入力してください。')
     return
   }
 
   isSubmittingEvent.value = true // ボタンを非表示にする
 
   const dominantEmotions = Object.entries(emotions.value)
-    .filter(([, value]) => value >= 60)
+    .filter(([, value]) => value > 0)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
 
   const newEnemies = []
-  if (dominantEmotions.length === 0) {
-    // 強い感情がない場合、通常モンスターを1体生成
-    newEnemies.push({
-      id: 1,
-      name: `${eventName.value}`,
+  // if (dominantEmotions.length === 0) {
+  //   // 強い感情がない場合、通常モンスターを1体生成
+  //   newEnemies.push({
+  //     id: 1,
+  //     name: `${eventName.value}`,
+  //     hp: 80,
+  //     maxHp: 80,
+  //     attack: 10,
+  //     defense: 5,
+  //     DEX: 90,
+  //     evasion: 10,
+  //     element: 'neutral',
+  //     exp: 30,
+  //     gold: 20,
+  //     image: monsterImages.neutral,
+  //   })
+  // } else {
+
+  const randomstatusjoy = Math.floor(Math.random() * playerBaseStats.value.count) + 1
+  const randomstatusanger = Math.floor(Math.random() * playerBaseStats.value.count) + 1
+  const randomstatussorrow = Math.floor(Math.random() * playerBaseStats.value.count) + 1
+  const randomstatusanxienty = Math.floor(Math.random() * playerBaseStats.value.count) + 1
+  const randomstatussurprise = Math.floor(Math.random() * playerBaseStats.value.count) + 1
+  const randomstatusdisgust = Math.floor(Math.random() * playerBaseStats.value.count) + 1
+
+  dominantEmotions.forEach(([emotion], index) => {
+    let monster = {
+      id: index,
       hp: 80,
       maxHp: 80,
       attack: 10,
       defense: 5,
       DEX: 90,
       evasion: 10,
-      element: 'neutral',
-      exp: 30,
-      gold: 20,
-      image: monsterImages.neutral,
-    })
-  } else {
-    dominantEmotions.forEach(([emotion, value], index) => {
-      let monster = {
-        id: index,
-        hp: 80 + value,
-        maxHp: 80 + value,
-        attack: 10,
-        defense: 5,
-        DEX: 90,
-        evasion: 10,
-        exp: 30 + value,
-        gold: 20 + Math.floor(value / 5),
-        image: monsterImages.default,
-      }
-      if (emotion === 'anger') {
-        monster.name = `${eventName.value}` + '怒り'
-        monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
-        monster.maxHp += 5 * playerBaseStats.value.count
-        monster.hp += 5 * playerBaseStats.value.count
-        monster.attack += 5 * playerBaseStats.value.count
-        monster.defense += 5 * playerBaseStats.value.count
+      exp: 30 + Math.floor(playerBaseStats.value.count / 5),
+      gold: 20 + Math.floor(playerBaseStats.value.count / 5),
+      image: monsterImages.default,
+    }
+    if (emotion === 'anger') {
+      monster.name = `${eventName.value}` + '怒り'
+      monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
+      monster.maxHp += 5 * randomstatusanger
+      monster.hp += 5 * randomstatusanger
+      monster.attack += 5 * randomstatusanger
+      monster.defense += 5 * randomstatusanger
 
-        monster.image = monsterImages.anger
-      } else if (emotion === 'sorrow') {
-        monster.name = `${eventName.value}` + '悲しみ'
-        monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
-        monster.maxHp += 5 * playerBaseStats.value.count
-        monster.hp += 5 * playerBaseStats.value.count
+      monster.image = monsterImages.anger
+    } else if (emotion === 'sorrow') {
+      monster.name = `${eventName.value}` + '悲しみ'
+      monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
+      monster.maxHp += 5 * randomstatussorrow
+      monster.hp += 5 * randomstatussorrow
 
-        monster.attack += 5 * playerBaseStats.value.count
-        monster.defense += 5 * playerBaseStats.value.count
+      monster.attack += 5 * randomstatussorrow
+      monster.defense += 5 * randomstatussorrow
 
-        monster.image = monsterImages.sorrow
-      } else if (emotion === 'anxiety') {
-        monster.name = `${eventName.value}` + '不安'
-        monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
-        monster.maxHp += 5 * playerBaseStats.value.count
-        monster.hp += 5 * playerBaseStats.value.count
+      monster.image = monsterImages.sorrow
+    } else if (emotion === 'anxiety') {
+      monster.name = `${eventName.value}` + '不安'
+      monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
+      monster.maxHp += 5 * randomstatusanxienty
+      monster.hp += 5 * randomstatusanxienty
 
-        monster.attack += 5 * playerBaseStats.value.count
-        monster.defense += 5 * playerBaseStats.value.count
+      monster.attack += 5 * randomstatusanxienty
+      monster.defense += 5 * randomstatusanxienty
 
-        monster.image = monsterImages.anxiety
-      } else if (emotion === 'joy') {
-        monster.name = `${eventName.value}` + '喜び'
-        monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
-        monster.maxHp += 5 * playerBaseStats.value.count
-        monster.hp += 5 * playerBaseStats.value.count
+      monster.image = monsterImages.anxiety
+    } else if (emotion === 'joy') {
+      monster.name = `${eventName.value}` + '喜び'
+      monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
+      monster.maxHp += 5 * randomstatusjoy
+      monster.hp += 5 * randomstatusjoy
 
-        monster.attack += 5 * playerBaseStats.value.count
-        monster.defense += 5 * playerBaseStats.value.count
-        monster.image = monsterImages.joy
-      } else if (emotion === 'surprise') {
-        monster.name = `${eventName.value}` + '驚き'
-        monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
-        monster.maxHp += 5 * playerBaseStats.value.count
-        monster.hp += 5 * playerBaseStats.value.count
+      monster.attack += 5 * randomstatusjoy
+      monster.defense += 5 * randomstatusjoy
+      monster.image = monsterImages.joy
+    } else if (emotion === 'surprise') {
+      monster.name = `${eventName.value}` + '驚き'
+      monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
+      monster.maxHp += 5 * randomstatussurprise
+      monster.hp += 5 * randomstatussurprise
 
-        monster.attack += 5 * playerBaseStats.value.count
-        monster.defense += 5 * playerBaseStats.value.count
-        monster.image = monsterImages.surprise
-      } else if (emotion === 'disgust') {
-        monster.name = `${eventName.value}` + '嫌悪'
-        monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
-        monster.maxHp += 5 * playerBaseStats.value.count
-        monster.hp += 5 * playerBaseStats.value.count
+      monster.attack += 5 * randomstatussurprise
+      monster.defense += 5 * randomstatussurprise
+      monster.image = monsterImages.surprise
+    } else if (emotion === 'disgust') {
+      monster.name = `${eventName.value}` + '嫌悪'
+      monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
+      monster.maxHp += 5 * randomstatusdisgust
+      monster.hp += 5 * randomstatusdisgust
 
-        monster.attack += 5 * playerBaseStats.value.count
-        monster.defense += 5 * playerBaseStats.value.count
-        monster.image = monsterImages.disgust
-      } else {
-        monster.name = `${eventName.value}幻影 ${index + 1}`
-        monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
-        monster.maxHp += 5 * playerBaseStats.value.count
-        monster.hp += 5 * playerBaseStats.value.count
+      monster.attack += 5 * randomstatusdisgust
+      monster.defense += 5 * randomstatusdisgust
+      monster.image = monsterImages.disgust
+    } //else {
+    //   monster.name = `${eventName.value}幻影 ${index + 1}`
+    //   monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
+    //   monster.maxHp += 5 * randomstatus
+    //   monster.hp += 5 * randomstatus
 
-        monster.attack += 5 * playerBaseStats.value.count
-        monster.defense += 5 * playerBaseStats.value.count
-      }
-      newEnemies.push(monster)
-    })
-  }
+    //   monster.attack += 5 * randomstatus
+    //   monster.defense += 5 * randomstatus
+    // }
+    newEnemies.push(monster)
+  })
+  //}
   enemies.value = newEnemies
 
   if (currentAdventure.value) {
@@ -1439,6 +1490,37 @@ const checkHit = (attacker, target) => {
   const totalEvasion = (target.evasion || 5) + (target.boosts?.evasion || 0)
   const hitChance = (totalAccuracy - totalEvasion) / 100
   return Math.random() < hitChance
+}
+
+// 【追加】再挑戦（ホームから）用の関数
+const resumeBattle = () => {
+  // プレイヤー情報を現在のステータスで再初期化（強化反映）
+  player.value = {
+    name: playerBaseStats.value.name,
+    avatar: playerBaseStats.value.avatar,
+    ...playerBaseStats.value,
+    hp: playerBaseStats.value.maxHp, // HP全快
+    mp: playerBaseStats.value.maxMp, // MP全快
+    isDefending: false,
+    magic: JSON.parse(JSON.stringify(playerMagics.value)),
+    boosts: { attack: 0, defense: 0, accuracy: 0, evasion: 0, duration: 0 },
+  }
+
+  // 敵は `enemies.value` をそのまま使う（HPは減ったまま）
+
+  battleLog.value = []
+  isPlayerTurn.value = true
+  isBattleOver.value = false
+  gameMessage.value = ''
+  returnToCommandSelect()
+  isLogVisible.value = false
+  isSubmittingEvent.value = true
+  addLog(`再び立ち上がった！ バトル再開！`)
+  isLogVisible.value = true
+  setTimeout(() => {
+    isLogVisible.value = false
+  }, 2000)
+  goToScreen('battle')
 }
 
 const retryBattle = () => {
@@ -1710,7 +1792,7 @@ const confirmMagicAttack = () => {
   const spell = selectedSpell.value
   player.value.mp -= spell.mpCost
   addLog(`MPを ${spell.mpCost} 消費した。`)
-
+  console.log(playerBaseStats.value.magicattack)
   if (!checkHit(player.value, target)) {
     addLog(`しかし ${spell.name} は ${target.name} には当たらなかった！`)
     endPlayerTurn()
@@ -1915,7 +1997,7 @@ const enemyTurn = async () => {
 const calculateDamage = (attacker, target) => {
   const totalAttack = (attacker.attack || 0) + (attacker.boosts?.attack || 0)
   const totalDefense = (target.defense || 0) + (target.boosts?.defense || 0)
-  const baseDamage = totalAttack - totalDefense / 2
+  const baseDamage = totalAttack - totalDefense
   const randomFactor = (Math.random() - 0.5) * 4
   return Math.max(1, Math.round(baseDamage + randomFactor))
 }
@@ -1951,6 +2033,9 @@ const checkWinner = () => {
     addLog(`全ての敵を倒した！`)
     playerBaseStats.value.count += 1
 
+    // コマンドに戻るボタンをオフ
+    Logmanual.value = false
+
     // 経験値とゴールドは敵ごとに合算
     let totalExp = 0
     let totalGold = 0
@@ -1977,7 +2062,7 @@ const checkWinner = () => {
     // プレイヤー敗北条件は変更なし
     isBattleOver.value = true
     didPlayerWin.value = false
-    gameMessage.value = '感情に飲み込まれた...'
+    gameMessage.value = ''
     addLog(`${player.value.name} は倒れた...`, 'enemy-action')
     addLog('負けることは終わりじゃない。それは新しい学びの始まり。', 'positive')
   }
@@ -2132,16 +2217,18 @@ const checkWinner = () => {
         <label for="stat-hp">最大HP (必要EXP:10)</label>
         <input type="number" v-model.number="tempStats.maxHp" readonly />
         <button
-          v-if="tempStats.exp >= upgradeCost.maxHp"
+          v-if="playerBaseStats.exp >= 10"
           @click="upgradeStat('maxHp')"
           class="plus-button"
+          :disabled="tempStats.exp <= upgradeCost.maxHp"
         >
           +
         </button>
         <button
-          v-if="playerBaseStats.exp !== 0"
+          v-if="playerBaseStats.exp >= 10"
           @click="downgradeStat('maxHp')"
           class="minus-button"
+          :disabled="tempStats.exp >= playerBaseStats.exp"
         >
           -
         </button>
@@ -2151,16 +2238,18 @@ const checkWinner = () => {
         <label for="stat-mp">最大MP (必要EXP:10)</label>
         <input type="number" v-model.number="tempStats.maxMp" readonly />
         <button
-          v-if="tempStats.exp >= upgradeCost.maxMp"
+          v-if="playerBaseStats.exp >= 10"
           @click="upgradeStat('maxMp')"
           class="plus-button"
+          :disabled="tempStats.exp <= upgradeCost.maxMp"
         >
           +
         </button>
         <button
-          v-if="playerBaseStats.exp !== 0"
+          v-if="playerBaseStats.exp >= 10"
           @click="downgradeStat('maxMp')"
           class="minus-button"
+          :disabled="tempStats.exp >= playerBaseStats.exp"
         >
           -
         </button>
@@ -2170,16 +2259,18 @@ const checkWinner = () => {
         <label for="stat-attack">攻撃力 (必要EXP:10)</label>
         <input type="number" v-model.number="tempStats.attack" readonly />
         <button
-          v-if="tempStats.exp >= upgradeCost.attack"
+          v-if="playerBaseStats.exp >= 10"
           @click="upgradeStat('attack')"
           class="plus-button"
+          :disabled="tempStats.exp <= upgradeCost.attack"
         >
           +
         </button>
         <button
-          v-if="playerBaseStats.exp !== 0"
+          v-if="playerBaseStats.exp >= 10"
           @click="downgradeStat('attack')"
           class="minus-button"
+          :disabled="tempStats.exp >= playerBaseStats.exp"
         >
           -
         </button>
@@ -2188,16 +2279,18 @@ const checkWinner = () => {
         <label for="stat-defense">防御力 (必要EXP:10)</label>
         <input type="number" v-model.number="tempStats.defense" readonly />
         <button
-          v-if="tempStats.exp >= upgradeCost.defense"
+          v-if="playerBaseStats.exp >= 10"
           @click="upgradeStat('defense')"
           class="plus-button"
+          :disabled="tempStats.exp <= upgradeCost.defense"
         >
           +
         </button>
         <button
-          v-if="playerBaseStats.exp !== 0"
+          v-if="playerBaseStats.exp >= 10"
           @click="downgradeStat('defense')"
           class="minus-button"
+          :disabled="tempStats.exp >= playerBaseStats.exp"
         >
           -
         </button>
@@ -2207,13 +2300,19 @@ const checkWinner = () => {
         <label for="stat-DEX">命中率 (必要EXP:100)</label>
         <input type="number" v-model.number="tempStats.DEX" readonly />
         <button
-          v-if="tempStats.exp >= upgradeCost.DEX"
+          v-if="playerBaseStats.exp >= 100"
           @click="upgradeStat('DEX')"
           class="plus-button"
+          :disabled="tempStats.exp <= upgradeCost.DEX"
         >
           +
         </button>
-        <button v-if="playerBaseStats.exp !== 0" @click="downgradeStat('DEX')" class="minus-button">
+        <button
+          v-if="playerBaseStats.exp >= 100"
+          @click="downgradeStat('DEX')"
+          class="minus-button"
+          :disabled="tempStats.exp >= playerBaseStats.exp"
+        >
           -
         </button>
       </div>
@@ -2222,16 +2321,18 @@ const checkWinner = () => {
         <label for="stat-evasion">回避率 (必要EXP:100)</label>
         <input type="number" v-model.number="tempStats.evasion" readonly />
         <button
-          v-if="tempStats.exp >= upgradeCost.evasion"
+          v-if="playerBaseStats.exp >= 100"
           @click="upgradeStat('evasion')"
           class="plus-button"
+          :disabled="tempStats.exp <= upgradeCost.evasion"
         >
           +
         </button>
         <button
-          v-if="playerBaseStats.exp !== 0"
+          v-if="playerBaseStats.exp >= 100"
           @click="downgradeStat('evasion')"
           class="minus-button"
+          :disabled="tempStats.exp >= playerBaseStats.exp"
         >
           -
         </button>
@@ -2244,7 +2345,9 @@ const checkWinner = () => {
 
     <div v-else-if="currentScreen === 'Invent'" class="screen inventory-screen">
       <h1>インベントリ</h1>
-      <div class="inventory-grid">
+      <div v-if="playerInventory.length === 0">アイテムを所持していません</div>
+
+      <div v-else-if="playerInventory" class="inventory-grid">
         <div
           v-for="item in playerInventory"
           :key="item.id"
@@ -2343,14 +2446,30 @@ const checkWinner = () => {
           <div class="battle-log">
             <p v-for="(log, index) in battleLog" :key="index" :class="log.type">{{ log.text }}</p>
           </div>
-          <div v-if="isBattleOver && !isEmotionLogVisible" class="game-over-message">
+          <!-- <div v-if="isBattleOver && !isEmotionLogVisible" class="game-over-message">
             <h2>{{ gameMessage }}</h2>
             <button v-if="didPlayerWin" @click="finalizeAdventure" class="win-button">
               ホームに戻る
             </button>
             <button v-else @click="retryBattle" class="lose-button">再挑戦</button>
           </div>
-          <button v-else @click="toggleLogView" class="return-button">コマンドに戻る</button>
+          <button v-else-if="Logmanual" @click="toggleLogView" class="return-button">
+            コマンドに戻る
+          </button> -->
+
+          <div v-if="isBattleOver && !isEmotionLogVisible" class="game-over-message">
+            <h2>{{ gameMessage }}</h2>
+            <button v-if="didPlayerWin" @click="finalizeAdventure" class="win-button">
+              ホームに戻る
+            </button>
+            <div v-else class="lose-buttons">
+              <button @click="retryBattle" class="lose-button">再挑戦</button>
+              <button @click="retreatToHome" class="retreat-button">ホームに戻る</button>
+            </div>
+          </div>
+          <button v-else-if="!isBattleOver" @click="toggleLogView" class="return-button">
+            コマンドに戻る
+          </button>
         </div>
         <div v-else class="player-control-wrapper">
           <div class="action-menu">
@@ -2600,8 +2719,19 @@ const checkWinner = () => {
     <button :class="{ active: currentScreen === 'home' }" @click="goToScreen('home')">
       ホーム
     </button>
-    <button :class="{ active: currentScreen === 'eventInput' }" @click="goToScreen('eventInput')">
+    <button
+      v-if="tab"
+      :class="{ active: currentScreen === 'eventInput' }"
+      @click="goToScreen('eventInput')"
+    >
       バトル
+    </button>
+    <button
+      v-else-if="!tab"
+      :class="{ active: currentScreen === 'eventInput' }"
+      @click="resumeBattle()"
+    >
+      再挑戦
     </button>
 
     <button :class="{ active: currentScreen === 'itemshop' }" @click="goToScreen('itemshop')">
@@ -2621,13 +2751,14 @@ const checkWinner = () => {
 
 <style scoped>
 /* --- グローバルレイアウト --- */
+
 #app-wrapper {
-  max-width: 750px;
+  max-width: 740px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  /* height: auto; */
-  /* background-color: #f0f2f5; */
+  min-height: 98vh;
+  background-color: #f9f9f9;
 }
 /*.screen-content {*/
 /* flex-grow: 1; */
@@ -2645,7 +2776,7 @@ const checkWinner = () => {
   bottom: 0;
   left: 0;
   right: 0;
-  max-width: 750px; /* #app-wrapperと合わせる */
+  max-width: 740px; /* #app-wrapperと合わせる */
   margin: 0 auto;
   display: flex;
   height: 60px;
@@ -2671,10 +2802,10 @@ const checkWinner = () => {
 }
 
 /* --- ホーム画面 --- */
-.home-screen {
-  /* background-color: #fff; */
-  /* position: relative; */
-}
+/* .home-screen { */
+/* background-color: #fff; */
+/* position: relative; */
+/* } */
 .home-layout {
   display: flex;
 
@@ -2807,12 +2938,22 @@ const checkWinner = () => {
 .plus-button:hover {
   background-color: #229954;
 }
+.plus-button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
 /* 【追加】マイナスボタンのスタイル */
 .minus-button {
   background-color: #e74c3c; /* 赤 */
 }
 .minus-button:hover {
   background-color: #c0392b;
+}
+
+.minus-button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
 }
 
 /* --- インベントリ --- */
@@ -2891,7 +3032,7 @@ const checkWinner = () => {
 } */
 
 .setup-screen {
-  height: 95vh;
+  /* height: 95vh; */
   background-color: #f9f9f9;
   /* margin-top: 100px; */
 }
@@ -3244,6 +3385,14 @@ const checkWinner = () => {
 .lose-button {
   background-color: #f44336;
 }
+.retreat-button {
+  margin-top: 10px;
+  background-color: #34495e !important;
+}
+.retreat-button:hover {
+  background-color: #2c3e50 !important;
+}
+
 .attack-input-form {
   /* display: flex; */
   width: 100%;
@@ -3298,8 +3447,8 @@ const checkWinner = () => {
   padding-bottom: 60px;
 }
 .divider {
-  border: 0;
-  border-top: 2px solid #eee;
+  /* border: 0;
+  border-top: 2px solid #eee; */
   margin: 30px 0;
 }
 
@@ -3501,6 +3650,7 @@ const checkWinner = () => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 15px;
+  padding-bottom: 60px;
 }
 .memory-card-summary {
   background: #fff;
@@ -3530,8 +3680,8 @@ const checkWinner = () => {
   color: #777;
 }
 .lookback-screen {
-  height: 95vh;
-  width: 750px;
+  height: 100%;
+  width: 740px;
   background-color: #f9f9f9;
   margin: 0 auto;
 }
@@ -3815,7 +3965,7 @@ const checkWinner = () => {
   padding: 8px 12px;
   border-radius: 5px;
   font-size: 0.9em;
-  width: 90%;
+  width: 30%;
   text-align: center;
   pointer-events: none; /* ツールチップ自体がマウスイベントを妨害しないようにする */
   z-index: 10;
