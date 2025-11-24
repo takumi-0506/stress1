@@ -457,7 +457,6 @@ const elementIcons = {
   fire: '🔥',
   water: '💧',
   wood: '🌳',
-  neutral: '⚪',
 }
 
 // import monsterjoy from '@/assets/shinwa_kirke_circe.png'
@@ -494,6 +493,7 @@ const saveGame = () => {
     goalList: goalList.value,
     memoryLog: memoryLog.value,
     achievements: achievements.value,
+    // currentScreen: currentScreen.value,
     // 【追加】中断している冒険データも保存する
     currentAdventure: currentAdventure.value,
     enemies: enemies.value, // 敵の状態も保存
@@ -518,6 +518,7 @@ const loadGame = () => {
       if (parsedData.goalList) goalList.value = parsedData.goalList
       if (parsedData.memoryLog) memoryLog.value = parsedData.memoryLog
       if (parsedData.achievements) achievements.value = parsedData.achievements
+      // if (parsedData.currentScreen) currentScreen.value = parsedData.currentScreen
 
       if (parsedData.currentAdventure) currentAdventure.value = parsedData.currentAdventure
       if (parsedData.enemies) enemies.value = parsedData.enemies
@@ -581,28 +582,28 @@ const achievements = ref({
   // --- ROW 2 (Medium) ---
   battle_novice: {
     name: 'ストレス・ルーキー',
-    description: 'バトルで 5回 勝利した',
+    description: 'バトルで 15回 勝利した',
     unlocked: false,
     icon: '⚔️',
     reward: 30,
   },
   power_word: {
     name: 'ポジティブ・スピーカー',
-    description: 'ポジティブな言葉で 10回 攻撃した',
+    description: 'ポジティブな言葉で 25回 攻撃した',
     unlocked: false,
     icon: '🌟',
     reward: 30,
   },
   shopper: {
     name: '買い物好き',
-    description: 'お店で合計 500G 使った',
+    description: 'お店で合計 2500G 使った',
     unlocked: false,
     icon: '💰',
     reward: 30,
   },
   goal_setter: {
     name: '目標達成者',
-    description: '目標を 5個 達成した',
+    description: '目標を 35個 達成した',
     unlocked: false,
     icon: '🎯',
     reward: 30,
@@ -610,7 +611,7 @@ const achievements = ref({
 
   memory_collector_1: {
     name: '記録者',
-    description: '記録を 3回 保存した',
+    description: '記録を 25回 保存した',
     unlocked: false,
     icon: '📚',
     reward: 30,
@@ -619,28 +620,28 @@ const achievements = ref({
   // --- ROW 3 (Hard) ---
   battle_veteran: {
     name: 'ストレス・バスター',
-    description: 'バトルで 20回 勝利した',
+    description: 'バトルで 70回 勝利した',
     unlocked: false,
     icon: '🎖️',
     reward: 70,
   },
   positive_master: {
     name: 'ポジティブシンキング',
-    description: 'ポジティブな言葉で 30回 攻撃した',
+    description: 'ポジティブな言葉で 85回 攻撃した',
     unlocked: false,
     icon: '💖',
     reward: 70,
   },
   big_spender: {
     name: 'お得意様',
-    description: 'お店で合計 2000G 使った',
+    description: 'お店で合計 10000G 使った',
     unlocked: false,
     icon: '💸',
     reward: 70,
   },
   goal_master: {
     name: '目標達成のエキスパート',
-    description: '目標を 15個 達成した',
+    description: '目標を 75個 達成した',
     unlocked: false,
     icon: '🏅',
     reward: 70,
@@ -648,7 +649,7 @@ const achievements = ref({
 
   memory_collector_2: {
     name: '心のジャーナリスト',
-    description: '記録を 10回 保存した',
+    description: '記録を 70回 保存した',
     unlocked: false,
     icon: '📔',
     reward: 70,
@@ -657,28 +658,28 @@ const achievements = ref({
   // --- ROW 4 (Very Hard) ---
   battle_master: {
     name: 'ストレス・マスター',
-    description: 'バトルで 50回 勝利した',
+    description: 'バトルで 100回 勝利した',
     unlocked: false,
     icon: '👑',
     reward: 100,
   },
   positive_legend: {
     name: 'ポジティブ・マスター',
-    description: 'ポジティブな言葉で 75回 攻撃した',
+    description: 'ポジティブな言葉で 100回 攻撃した',
     unlocked: false,
     icon: '☀️',
     reward: 100,
   },
   high_roller: {
     name: 'お買い物・マスター',
-    description: 'お店で合計 5000G 使った',
+    description: 'お店で合計 50000G 使った',
     unlocked: false,
     icon: '💎',
     reward: 100,
   },
   goal_legend: {
     name: '目標・マスター',
-    description: '目標を 30個 達成した',
+    description: '目標を 100個 達成した',
     unlocked: false,
     icon: '📜',
     reward: 100,
@@ -686,7 +687,7 @@ const achievements = ref({
 
   memory_collector_3: {
     name: '記録・マスター',
-    description: '冒険の記録を 20回 保存した',
+    description: '冒険の記録を 100回 保存した',
     unlocked: false,
     icon: '🏛️',
     reward: 100,
@@ -883,9 +884,9 @@ const finalizeAdventure = () => {
     //   unlockAchievement('memory_collector')
     // }
     unlockAchievement('first_memory')
-    if (memoryLog.value.length >= 3) unlockAchievement('memory_collector_1')
-    if (memoryLog.value.length >= 10) unlockAchievement('memory_collector_2')
-    if (memoryLog.value.length >= 20) unlockAchievement('memory_collector_3')
+    if (memoryLog.value.length >= 25) unlockAchievement('memory_collector_1')
+    if (memoryLog.value.length >= 70) unlockAchievement('memory_collector_2')
+    if (memoryLog.value.length >= 100) unlockAchievement('memory_collector_3')
     // バトル後のアイテム状態を永続データに反映
     // playerInventory.value = JSON.parse(JSON.stringify(player.value.inventory))
   }
@@ -975,10 +976,6 @@ const buyitem = (itemName) => {
       // if (playerBaseStats.value.totalGoldSpent >= 500) {
       //   unlockAchievement('high_spender')
       // }
-      unlockAchievement('first_purchase')
-      if (playerBaseStats.value.totalGoldSpent >= 500) unlockAchievement('shopper')
-      if (playerBaseStats.value.totalGoldSpent >= 2000) unlockAchievement('big_spender')
-      if (playerBaseStats.value.totalGoldSpent >= 5000) unlockAchievement('high_roller')
 
       existingItem.quantity += 1 // 持っていれば個数を増やす
     } else if (existingItem.quantity >= 99) {
@@ -1005,10 +1002,11 @@ const buyitem = (itemName) => {
     })
     alert(`${itemName.name} を購入しました！`)
     // 実績チェック
-    if (playerBaseStats.value.totalGoldSpent >= 500) {
-      unlockAchievement('high_spender')
-    }
   }
+  unlockAchievement('first_purchase')
+  if (playerBaseStats.value.totalGoldSpent >= 2500) unlockAchievement('shopper')
+  if (playerBaseStats.value.totalGoldSpent >= 10000) unlockAchievement('big_spender')
+  if (playerBaseStats.value.totalGoldSpent >= 50000) unlockAchievement('high_roller')
 }
 
 // 目標リスト画面用の関数
@@ -1024,9 +1022,9 @@ const completeGoal = (goal) => {
   // unlockAchievement('first_goal')
   playerBaseStats.value.goalsCompleted++
   unlockAchievement('first_goal')
-  if (playerBaseStats.value.goalsCompleted >= 5) unlockAchievement('goal_setter')
-  if (playerBaseStats.value.goalsCompleted >= 15) unlockAchievement('goal_master')
-  if (playerBaseStats.value.goalsCompleted >= 30) unlockAchievement('goal_legend')
+  if (playerBaseStats.value.goalsCompleted >= 35) unlockAchievement('goal_setter')
+  if (playerBaseStats.value.goalsCompleted >= 75) unlockAchievement('goal_master')
+  if (playerBaseStats.value.goalsCompleted >= 100) unlockAchievement('goal_legend')
 }
 
 // タスク追加関数
@@ -1506,6 +1504,11 @@ const resumeBattle = () => {
     boosts: { attack: 0, defense: 0, accuracy: 0, evasion: 0, duration: 0 },
   }
 
+  enemies.value = enemies.value.map((enemy) => ({
+    ...enemy,
+    hp: enemy.maxHp,
+  }))
+
   // 敵は `enemies.value` をそのまま使う（HPは減ったまま）
 
   battleLog.value = []
@@ -1527,6 +1530,14 @@ const retryBattle = () => {
   player.value.hp = player.value.maxHp
   player.value.mp = player.value.maxMp // MPも回復
   player.value.isDefending = false
+  enemies.value.hp = enemies.value.maxHp
+  enemies.value.mp = enemies.value.maxMp
+
+  enemies.value = enemies.value.map((enemy) => ({
+    ...enemy,
+    hp: enemy.maxHp,
+  }))
+
   isBattleOver.value = false
   gameMessage.value = ''
   isPlayerTurn.value = true
@@ -1718,9 +1729,9 @@ const confirmAttack = () => {
       // unlockAchievement('positive_warrior') // 実績チェック
       playerBaseStats.value.positiveAttacksUsed++
       unlockAchievement('positive_warrior')
-      if (playerBaseStats.value.positiveAttacksUsed >= 10) unlockAchievement('power_word')
-      if (playerBaseStats.value.positiveAttacksUsed >= 30) unlockAchievement('positive_master')
-      if (playerBaseStats.value.positiveAttacksUsed >= 75) unlockAchievement('positive_legend')
+      if (playerBaseStats.value.positiveAttacksUsed >= 25) unlockAchievement('power_word')
+      if (playerBaseStats.value.positiveAttacksUsed >= 70) unlockAchievement('positive_master')
+      if (playerBaseStats.value.positiveAttacksUsed >= 100) unlockAchievement('positive_legend')
     }
   }
   const multiplier = getElementMultiplier('neutral', target.element)
@@ -2053,9 +2064,9 @@ const checkWinner = () => {
     // unlockAchievement('first_win') // 実績チェック
     playerBaseStats.value.battlesWon++
     unlockAchievement('first_win')
-    if (playerBaseStats.value.battlesWon >= 5) unlockAchievement('battle_novice')
-    if (playerBaseStats.value.battlesWon >= 20) unlockAchievement('battle_veteran')
-    if (playerBaseStats.value.battlesWon >= 50) unlockAchievement('battle_master')
+    if (playerBaseStats.value.battlesWon >= 15) unlockAchievement('battle_novice')
+    if (playerBaseStats.value.battlesWon >= 70) unlockAchievement('battle_veteran')
+    if (playerBaseStats.value.battlesWon >= 100) unlockAchievement('battle_master')
 
     isEmotionLogVisible.value = true
   } else if (player.value.hp <= 0) {
@@ -2467,7 +2478,7 @@ const checkWinner = () => {
               <button @click="retreatToHome" class="retreat-button">ホームに戻る</button>
             </div>
           </div>
-          <button v-else-if="!isBattleOver" @click="toggleLogView" class="return-button">
+          <button v-else-if="Logmanual" @click="toggleLogView" class="return-button">
             コマンドに戻る
           </button>
         </div>
