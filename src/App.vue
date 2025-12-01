@@ -4117,7 +4117,7 @@ const checkWinner = () => {
   padding: 8px 12px;
   border-radius: 5px;
   font-size: 0.9em;
-  width: 70%;
+  width: 40%;
   text-align: center;
   pointer-events: none; /* ツールチップ自体がマウスイベントを妨害しないようにする */
   z-index: 10;
