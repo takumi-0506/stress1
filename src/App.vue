@@ -49,10 +49,10 @@ const playerBaseStats = ref({
   maxMp: 10,
   // attack: 5,
   magicattack: 10,
-  attack: 200,
+  attack: 10,
   defense: 5,
   magicdefense: 10,
-  DEX: 300,
+  DEX: 80,
   evasion: 10,
   exp: 0,
   gold: 0,
@@ -1530,7 +1530,7 @@ const createMonsterAndStartBattle = () => {
   isLogVisible.value = false
 
   // attackHistory.value = [] // 攻撃履歴をリセット
-  console.log(playerBaseStats.value.attack)
+  // console.log(playerBaseStats.value.attack)
   addLog(`あなたの感情から「${eventName.value}」が生まれた！`, 'system')
   isLogVisible.value = true
 
@@ -1559,7 +1559,8 @@ const addLog = (message, type = 'normal') => {
 
 const checkHit = (attacker, target) => {
   // もしaccuracyやevasionが未設定でも、デフォルト値を使って計算がNaNになるのを防ぐ
-
+  // console.log(attacker.DEX)
+  // console.log(target.evasion)
   const totalAccuracy = (attacker.DEX || 100) + (attacker.boosts?.DEX || 0)
   const totalEvasion = (target.evasion || 5) + (target.boosts?.evasion || 0)
   const hitChance = (totalAccuracy - totalEvasion) / 100
@@ -1839,7 +1840,7 @@ const confirmAttack = () => {
     'player-action',
   )
   alldamage.value += damage
-  console.log(alldamage.value)
+  // console.log(alldamage.value)
   if (!isPenalty && currentAdventure.value) {
     currentAdventure.value.attackHistory.push(attackMoveName.value)
   }
@@ -1892,7 +1893,7 @@ const confirmMagicAttack = () => {
   const spell = selectedSpell.value
   player.value.mp -= spell.mpCost
   addLog(`MPを ${spell.mpCost} 消費した。`)
-  console.log(playerBaseStats.value.magicattack)
+  // console.log(playerBaseStats.value.magicattack)
   if (!checkHit(player.value, target)) {
     addLog(`しかし ${spell.name} は ${target.name} には当たらなかった！`)
     endPlayerTurn()
@@ -1919,7 +1920,7 @@ const confirmMagicAttack = () => {
   )
 
   if (currentAdventure.value) {
-    currentAdventure.value.attackHistory.push(`${spell.name}(${magicChant.value})`)
+    currentAdventure.value.attackHistory.push(`${magicChant.value}`)
   }
   endPlayerTurn()
 }
@@ -2152,7 +2153,7 @@ const checkWinner = () => {
 
     // unlockAchievement('first_win') // 実績チェック
     playerBaseStats.value.battlesWon++
-    console.log(playerBaseStats.value.battlesWon)
+    // console.log(playerBaseStats.value.battlesWon)
     unlockAchievement('first_win')
     if (playerBaseStats.value.battlesWon >= 15) unlockAchievement('battle_novice')
     if (playerBaseStats.value.battlesWon >= 70) unlockAchievement('battle_veteran')
