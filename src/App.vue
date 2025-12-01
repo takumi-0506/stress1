@@ -74,7 +74,8 @@ const playerMagics = ref([
     name: 'リラクゼーション',
     mpCost: 10,
     effect: 'damage',
-    power: 25, //+ playerBaseStats.value.magicattack,
+    power: 25 + playerBaseStats.value.attack,
+    textpower: '攻撃力： +25\n属性：火\n心身の緊張状態を緩め、ストレスを軽減させる方法',
     element: 'fire',
     description: '心身の緊張状態を緩め、ストレスを軽減させる方法',
   },
@@ -84,6 +85,9 @@ const playerMagics = ref([
     mpCost: 10,
     effect: 'damage',
     power: 25,
+    textpower:
+      '攻撃力：+25\n属性：水\n心拍数の低下や副交感神経が優位な状態につながり、リラックス効果がある',
+
     element: 'water',
     description: '心拍数の低下や副交感神経が優位な状態につながり、リラックス効果がある',
   },
@@ -93,60 +97,73 @@ const playerMagics = ref([
     mpCost: 10,
     effect: 'damage',
     power: 25,
+    textpower: '攻撃力： +25\n属性：木\n適切な睡眠時間は6～8時間とされている',
     element: 'wood',
     description: '適切な睡眠時間は6～8時間とされている',
   },
   {
     id: 4,
-    name: '中火',
+    name: 'マインドフルネス',
     mpCost: 30,
     effect: 'damage',
     power: 50,
+    textpower: '攻撃力： +25\n属性：火\n',
+
     element: 'fire',
     description: '中火',
   },
   {
     id: 5,
-    name: '中水',
+    name: 'コーピング',
     mpCost: 30,
     effect: 'damage',
     power: 50,
+    textpower: '攻撃力： +25\n属性：水\n',
+
     element: 'water',
     description: '中水',
   },
   {
     id: 6,
-    name: '中木',
+    name: 'コミュニケーション',
     mpCost: 30,
     effect: 'damage',
     power: 50,
+    textpower: '攻撃力： +25\n属性：木\n',
+
     element: 'wood',
     description: '中木',
   },
   {
     id: 7,
-    name: '大火',
+    name: '運動',
     mpCost: 100,
     effect: 'damage',
     power: 100,
+    textpower: '攻撃力： +25\n属性：火\n',
+
     element: 'fire',
     description: '大火',
   },
   {
     id: 8,
-    name: '大水',
+    name: 'ジャーナリング',
     mpCost: 100,
     effect: 'damage',
     power: 100,
+    textpower: '攻撃力： +25\n属性：水\n',
+
     element: 'water',
     description: '大水',
   },
   {
     id: 9,
-    name: '大木',
+    name: 'セルフコンパッション',
     mpCost: 100,
     effect: 'damage',
     power: 100,
+    textpower: '攻撃力： +25\n属性：木\n',
+
     element: 'wood',
     description: '大木',
   },
@@ -191,9 +208,9 @@ const shopItems = ref([
     price: 80,
     effect: 'boost',
     targetStat: 'attack',
-    power: 5,
+    power: 20,
     duration: 3,
-    description: '3ターンの間、攻撃力が5上昇',
+    description: '2ターンの間、攻撃力が20上昇',
     relaxingeffect: 'ストレス解消に有効なカルシウムやビタミンB2が含まれいる。',
     image: milk,
   },
@@ -203,9 +220,9 @@ const shopItems = ref([
     price: 80,
     effect: 'boost',
     targetStat: 'defense',
-    power: 5,
+    power: 20,
     duration: 3,
-    description: '3ターンの間、防御力が5上昇',
+    description: '2ターンの間、防御力が20上昇',
     relaxingeffect: '自律神経を整える効果。',
     image: herb,
   },
@@ -217,7 +234,7 @@ const shopItems = ref([
     targetStat: 'DEX',
     power: 10,
     duration: 3,
-    description: '3ターンの間、命中率が10上昇',
+    description: '2ターンの間、命中率が10上昇',
     relaxingeffect: '自律神経を整えてくれます。',
     image: soy,
   },
@@ -229,7 +246,7 @@ const shopItems = ref([
     targetStat: 'evasion',
     power: 10,
     duration: 3,
-    description: '3ターンの間、回避率が10上昇',
+    description: '2ターンの間、回避率が10上昇',
     relaxingeffect:
       'リラックス作用のあるテアニンを含んでいる緑茶は、自律神経を落ち着かせる働きが期待できる。',
     image: green,
@@ -583,6 +600,7 @@ const achievements = ref({
   battle_novice: {
     name: 'ストレス・ルーキー',
     description: 'バトルで 15回 勝利した',
+    kaisu: 'バトルで ' + playerBaseStats.value.battlesWon + '回 勝利した',
     unlocked: false,
     icon: '⚔️',
     reward: 30,
@@ -695,6 +713,64 @@ const achievements = ref({
 })
 // 【追加】実績解除通知用
 const achievementToast = ref(null)
+
+// 【追加】実績の達成条件マッピング
+const achievementRequirements = {
+  first_win: { stat: 'battlesWon', target: 1, unit: '回' },
+  first_goal: { stat: 'goalsCompleted', target: 1, unit: '個' },
+  positive_warrior: { stat: 'positiveAttacksUsed', target: 1, unit: '回' },
+  first_purchase: { stat: 'totalGoldSpent', target: 1, unit: '回' },
+  first_memory: { stat: 'memoryLogLength', target: 1, unit: '回' },
+
+  battle_novice: { stat: 'battlesWon', target: 15, unit: '回' },
+  goal_setter: { stat: 'goalsCompleted', target: 35, unit: '個' },
+  shopper: { stat: 'totalGoldSpent', target: 2500, unit: 'G' },
+  memory_collector_1: { stat: 'memoryLogLength', target: 25, unit: '回' },
+  power_word: { stat: 'positiveAttacksUsed', target: 25, unit: '回' },
+
+  battle_veteran: { stat: 'battlesWon', target: 70, unit: '回' },
+  goal_master: { stat: 'goalsCompleted', target: 75, unit: '個' },
+  big_spender: { stat: 'totalGoldSpent', target: 10000, unit: 'G' },
+  memory_collector_2: { stat: 'memoryLogLength', target: 70, unit: '回' },
+  positive_master: { stat: 'positiveAttacksUsed', target: 85, unit: '回' },
+
+  battle_master: { stat: 'battlesWon', target: 100, unit: '回' },
+  goal_legend: { stat: 'goalsCompleted', target: 100, unit: '個' },
+  high_roller: { stat: 'totalGoldSpent', target: 50000, unit: 'G' },
+  memory_collector_3: { stat: 'memoryLogLength', target: 100, unit: '回' },
+  positive_legend: { stat: 'positiveAttacksUsed', target: 100, unit: '回' },
+}
+
+// 【追加】実績の進捗情報を取得する関数
+const getAchievementProgress = (id) => {
+  const req = achievementRequirements[id]
+  if (!req) return null
+
+  const target = req.target
+  const unit = req.unit
+  let rawCurrent = 0
+
+  if (req.stat === 'memoryLogLength') {
+    rawCurrent = memoryLog.value.length
+  } else {
+    rawCurrent = playerBaseStats.value[req.stat] || 0
+  }
+
+  // 「初めてのお買い物」は、totalGoldSpentが0より大きければ1回と見なす
+  if (id === 'first_purchase') {
+    rawCurrent = rawCurrent > 0 ? 1 : 0
+  }
+
+  // 表示する現在値を目標値でキャップする (例: 6/5ではなく5/5と表示)
+  const displayCurrentValue = Math.min(rawCurrent, target)
+
+  return {
+    current: displayCurrentValue,
+    target: target,
+    unit: unit,
+    isComplete: rawCurrent >= target, // 達成済みかどうか
+  }
+}
 
 watch(
   [playerBaseStats, playerInventory, goalList, memoryLog, achievements, currentAdventure, enemies],
@@ -899,14 +975,14 @@ const finalizeAdventure = () => {
 // ステータス割り振り関数
 const upgradeStat = (statName) => {
   const cost = upgradeCost[statName]
-  if (tempStats.value.exp >= cost) {
-    tempStats.value.exp -= cost
+  if (playerBaseStats.value.exp >= cost) {
+    playerBaseStats.value.exp -= cost
     if (statName === 'maxHp') {
-      tempStats.value.maxHp += 10
+      playerBaseStats.value.maxHp += 10
     } else if (statName === 'maxMp') {
-      tempStats.value.maxMp += 10
+      playerBaseStats.value.maxMp += 10
     } else {
-      tempStats.value[statName] += 1
+      playerBaseStats.value[statName] += 1
     }
   } else {
     alert('経験値が足りません')
@@ -1454,7 +1530,7 @@ const createMonsterAndStartBattle = () => {
   isLogVisible.value = false
 
   // attackHistory.value = [] // 攻撃履歴をリセット
-
+  console.log(playerBaseStats.value.attack)
   addLog(`あなたの感情から「${eventName.value}」が生まれた！`, 'system')
   isLogVisible.value = true
 
@@ -1569,8 +1645,20 @@ const retryBattle = () => {
 const showTooltip = (description) => {
   tooltipText.value = description
 }
+const tooltipPower = ref('')
+const tooltipdescription = ref('')
+
+const showTooltipmagic = (textpower, description) => {
+  tooltipPower.value = textpower
+  tooltipdescription.value = description
+}
+
 const hideTooltip = () => {
   tooltipText.value = ''
+}
+const hiddenTooltipmagic = () => {
+  tooltipPower.value = ''
+  tooltipdescription.value = ''
 }
 
 // 【変更】コマンド選択処理
@@ -1589,6 +1677,7 @@ const hideTooltip = () => {
 // }
 // 【修正】選択したコマンドを記憶
 const selectCommand = (command) => {
+  Logmanual.value = false
   if (!isPlayerTurn.value || isBattleOver.value) return
 
   player.value.lastCommand = command // コマンドを記憶
@@ -1879,10 +1968,11 @@ const useItem = (item) => {
     addLog(`アイテム「${item.name}」を使った！ HPが ${item.power} 回復した！`, 'positive')
   } else if (item.effect === 'boost') {
     // 既存の効果をリセット
-    player.value.boosts = { attack: 0, defense: 0, DEX: 0, evasion: 0, duration: 0 }
+    //player.value.boosts = { attack: 0, defense: 0, DEX: 0, evasion: 0, duration: 0 }
     // 新しい効果を適用
     player.value.boosts[item.targetStat] = item.power
     player.value.boosts.duration = item.duration
+
     addLog(`アイテム「${item.name}」を使った！ ${item.description}！`, 'positive')
   }
 
@@ -1912,15 +2002,6 @@ const endPlayerTurn = () => {
 const enemyTurn = async () => {
   if (isBattleOver.value) return
 
-  // ターン開始時にプレイヤーのバフターン数を減らす
-  if (player.value.boosts.duration > 0) {
-    player.value.boosts.duration--
-    if (player.value.boosts.duration === 0) {
-      player.value.boosts = { attack: 0, defense: 0, accuracy: 0, evasion: 0, duration: 0 }
-      addLog('ステータス上昇効果が切れた。')
-    }
-  }
-
   // 生きている敵が順番に行動
   for (const enemy of enemies.value) {
     if (enemy.hp > 0 && !isBattleOver.value) {
@@ -1943,6 +2024,14 @@ const enemyTurn = async () => {
       }
       player.value.isDefending = false // プレイヤーの防御は1回の攻撃で解除される
       checkWinner() // 敵の攻撃でバトルが終わる可能性もある
+    }
+  }
+  // ターン開始時にプレイヤーのバフターン数を減らす
+  if (player.value.boosts.duration > 0) {
+    player.value.boosts.duration--
+    if (player.value.boosts.duration === 0) {
+      player.value.boosts = { attack: 0, defense: 0, accuracy: 0, evasion: 0, duration: 0 }
+      addLog('ステータス上昇効果が切れた。')
     }
   }
 
@@ -2063,6 +2152,7 @@ const checkWinner = () => {
 
     // unlockAchievement('first_win') // 実績チェック
     playerBaseStats.value.battlesWon++
+    console.log(playerBaseStats.value.battlesWon)
     unlockAchievement('first_win')
     if (playerBaseStats.value.battlesWon >= 15) unlockAchievement('battle_novice')
     if (playerBaseStats.value.battlesWon >= 70) unlockAchievement('battle_veteran')
@@ -2372,7 +2462,7 @@ const checkWinner = () => {
           <!-- </div> -->
         </div>
       </div>
-      <div v-if="tooltipText" class="tooltip">{{ tooltipText }}</div>
+      <div v-if="tooltipText" class="tooltip-inventory">{{ tooltipText }}</div>
     </div>
 
     <div v-else-if="currentScreen === 'eventInput'" class="screen setup-screen">
@@ -2518,26 +2608,33 @@ const checkWinner = () => {
             <div class="sub-menu" v-else-if="playerActionState === 'selecting_magic'">
               <p>ターゲット: {{ enemies[selectedTargetIndex]?.name }}</p>
               <button
-                v-for="spell in player.magic"
+                v-for="spell in playerMagics"
                 :key="spell.id"
+                @mouseover="showTooltipmagic(spell.textpower, spell.description)"
+                @mouseleave="hiddenTooltipmagic"
                 @click="selectSpell(spell)"
                 :disabled="player.mp < spell.mpCost"
               >
                 {{ elementIcons[spell.element] }} {{ spell.name }} (MP: {{ spell.mpCost }})
               </button>
               <button @click="battleback" class="cancel-button">戻る</button>
+
+              <div v-if="tooltipPower" class="tooltip-magic">{{ tooltipPower }}</div>
+              <!-- <div v-if="tooltipdescription" class="tooltip-magic">
+                {{ tooltipdescription }}
+              </div> -->
             </div>
 
             <div class="attack-input-form" v-else-if="playerActionState === 'inputting_magic'">
               <p>ターゲット: {{ enemies[selectedTargetIndex]?.name }}</p>
               <p>
-                魔法:
+                スキル:
                 {{ selectedSpell?.name }}
               </p>
               <input
                 type="text"
                 v-model="magicChant"
-                placeholder="考え（詠唱）を入力..."
+                placeholder="考えを入力..."
                 @keyup.enter="confirmMagicAttack"
               />
               <div class="attack-buttons">
@@ -2553,11 +2650,14 @@ const checkWinner = () => {
                 v-for="item in playerInventory"
                 :key="item.id"
                 @click="useItem(item)"
+                @mouseover="showTooltip(item.description)"
+                @mouseleave="hideTooltip"
                 :disabled="item.quantity <= 0"
               >
                 <img :src="item.image" :alt="item.name" class="item-image-battle" />
                 {{ item.name }} (残: {{ item.quantity }})
               </button>
+              <div v-if="tooltipText" class="tooltip">{{ tooltipText }}</div>
 
               <button @click="returnToCommandSelect" class="cancel-button">戻る</button>
             </div>
@@ -2628,6 +2728,8 @@ const checkWinner = () => {
       <!-- <div v-else-if="currentScreen === 'memoryLog'" class="screen memory-log-screen"> -->
       <!-- <div v-else-if="currentScreen === 'memoryLog'" class="screen memory-log-screen"> -->
       <h1>記録</h1>
+      <div>記録した回数： {{ playerBaseStats.battlesWon }} 回</div>
+
       <div v-if="memoryLog.length > 0" class="memory-list">
         <div
           v-for="adventure in memoryLog"
@@ -2719,6 +2821,10 @@ const checkWinner = () => {
             <h3 class="achievement-name">{{ ach.unlocked ? ach.name : '？？？' }}</h3>
             <p class="achievement-desc">
               {{ ach.unlocked ? ach.description : ach.description }}
+            </p>
+            <p class="achievement-desc">
+              現在: {{ getAchievementProgress(id).current }} /
+              {{ getAchievementProgress(id).target }} {{ getAchievementProgress(id).unit }}
             </p>
           </div>
         </div>
@@ -3422,7 +3528,7 @@ const checkWinner = () => {
 .sub-menu {
   width: 100%;
   display: flex;
-  justify-content: center;
+  /* justify-content: center; */
   flex-direction: column;
   gap: 10px;
   padding: 10px 0;
@@ -3968,6 +4074,41 @@ const checkWinner = () => {
 /* 【追加】ツールチップのスタイル */
 .tooltip {
   position: absolute;
+  bottom: 10px; /*メニューエリアの下部に配置*/
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 0.9em;
+  width: 70%;
+  text-align: center;
+  pointer-events: none; /* ツールチップ自体がマウスイベントを妨害しないようにする */
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.tooltip-magic {
+  position: absolute;
+  bottom: 20px; /*メニューエリアの下部に配置 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 0.9em;
+  width: 70%;
+  text-align: center;
+  pointer-events: none; /* ツールチップ自体がマウスイベントを妨害しないようにする */
+  z-index: 10;
+  box-sizing: border-box;
+  white-space: pre-line;
+}
+
+.tooltip-inventory {
+  position: absolute;
   /* bottom: 20px; メニューエリアの下部に配置 */
   left: 50%;
   transform: translateX(-50%);
@@ -3976,11 +4117,12 @@ const checkWinner = () => {
   padding: 8px 12px;
   border-radius: 5px;
   font-size: 0.9em;
-  width: 30%;
+  width: 70%;
   text-align: center;
   pointer-events: none; /* ツールチップ自体がマウスイベントを妨害しないようにする */
   z-index: 10;
   box-sizing: border-box;
+  white-space: pre-line;
 }
 
 /* 吹き出し本体 */
@@ -3995,7 +4137,7 @@ const checkWinner = () => {
   font-size: 16px;
   background: #1abc9c; */
 /*position: absolute;
- 
+
 /*bottom: 10px; /*メニューエリアの下部に配置 */
 /*left: 50%;*/
 /*transform: translateX(-50%);
