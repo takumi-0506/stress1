@@ -511,15 +511,14 @@ const saveGame = () => {
     memoryLog: memoryLog.value,
     achievements: achievements.value,
     // currentScreen: currentScreen.value,
-    // 【追加】中断している冒険データも保存する
+    // 中断している冒険データも保存する
     currentAdventure: currentAdventure.value,
     enemies: enemies.value, // 敵の状態も保存
-    retory: tab.value,
   }
   localStorage.setItem(GAME_DATA_KEY, JSON.stringify(dataToSave))
 }
 
-// 【追加】ゲームロード関数
+// ゲームロード関数
 const loadGame = () => {
   const savedData = localStorage.getItem(GAME_DATA_KEY)
   if (savedData) {
@@ -540,7 +539,6 @@ const loadGame = () => {
 
       if (parsedData.currentAdventure) currentAdventure.value = parsedData.currentAdventure
       if (parsedData.enemies) enemies.value = parsedData.enemies
-      if (parsedData.tab) tab.value = parsedData.tab
 
       // データがあり、名前も設定されていればホームへ
       if (playerBaseStats.value.name) {
@@ -566,14 +564,14 @@ const achievements = ref({
     description: 'モンスターを初めて倒した',
     unlocked: false,
     icon: '🏆',
-    reward: 10,
+    reward: 30,
   },
   positive_warrior: {
     name: 'ポジティブ・スタート',
     description: 'ポジティブな言葉で攻撃した',
     unlocked: false,
     icon: '✨',
-    reward: 10,
+    reward: 30,
   },
 
   first_purchase: {
@@ -581,21 +579,21 @@ const achievements = ref({
     description: 'お店で初めてアイテムを購入した',
     unlocked: false,
     icon: '🛍️',
-    reward: 10,
+    reward: 30,
   },
   first_goal: {
     name: 'はじめの一歩',
     description: '目標を初めて達成した',
     unlocked: false,
     icon: '✅',
-    reward: 10,
+    reward: 30,
   },
   first_memory: {
     name: '最初の記録',
     description: '記録を初めて保存した',
     unlocked: false,
     icon: '✍️',
-    reward: 10,
+    reward: 30,
   },
 
   // --- ROW 2 (Medium) ---
@@ -605,28 +603,28 @@ const achievements = ref({
     kaisu: 'バトルで ' + playerBaseStats.value.battlesWon + '回 勝利した',
     unlocked: false,
     icon: '⚔️',
-    reward: 30,
+    reward: 50,
   },
   power_word: {
     name: 'ポジティブ・スピーカー',
     description: 'ポジティブな言葉で 25回 攻撃した',
     unlocked: false,
     icon: '🌟',
-    reward: 30,
+    reward: 50,
   },
   shopper: {
     name: '買い物好き',
     description: 'お店で合計 2500G 使った',
     unlocked: false,
     icon: '💰',
-    reward: 30,
+    reward: 50,
   },
   goal_setter: {
     name: '目標達成者',
     description: '目標を 35個 達成した',
     unlocked: false,
     icon: '🎯',
-    reward: 30,
+    reward: 50,
   },
 
   memory_collector_1: {
@@ -634,7 +632,7 @@ const achievements = ref({
     description: '記録を 25回 保存した',
     unlocked: false,
     icon: '📚',
-    reward: 30,
+    reward: 50,
   },
 
   // --- ROW 3 (Hard) ---
@@ -1424,7 +1422,7 @@ const createMonsterAndStartBattle = () => {
       id: index,
       hp: 10,
       maxHp: 10,
-      attack: 5,
+      attack: 10,
       defense: 2,
       DEX: 90,
       evasion: 10,
