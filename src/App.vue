@@ -975,14 +975,14 @@ const finalizeAdventure = () => {
 // ステータス割り振り関数
 const upgradeStat = (statName) => {
   const cost = upgradeCost[statName]
-  if (playerBaseStats.value.exp >= cost) {
-    playerBaseStats.value.exp -= cost
+  if (tempStats.value.exp >= cost) {
+    tempStats.value.exp -= cost
     if (statName === 'maxHp') {
-      playerBaseStats.value.maxHp += 10
+      tempStats.value.maxHp += 10
     } else if (statName === 'maxMp') {
-      playerBaseStats.value.maxMp += 10
+      tempStats.value.maxMp += 10
     } else {
-      playerBaseStats.value[statName] += 1
+      tempStats.value[statName] += 1
     }
   } else {
     alert('経験値が足りません')
