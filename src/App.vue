@@ -1422,7 +1422,7 @@ const createMonsterAndStartBattle = () => {
   dominantEmotions.forEach(([emotion], index) => {
     let monster = {
       id: index,
-      hp: 80,
+      hp: 10,
       maxHp: 10,
       attack: 5,
       defense: 2,
