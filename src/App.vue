@@ -1423,9 +1423,9 @@ const createMonsterAndStartBattle = () => {
     let monster = {
       id: index,
       hp: 80,
-      maxHp: 80,
-      attack: 10,
-      defense: 5,
+      maxHp: 10,
+      attack: 5,
+      defense: 2,
       DEX: 90,
       evasion: 10,
       exp: 30 + Math.floor(playerBaseStats.value.count / 5),
