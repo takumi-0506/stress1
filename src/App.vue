@@ -775,7 +775,16 @@ const getAchievementProgress = (id) => {
 }
 
 watch(
-  [playerBaseStats, playerInventory, goalList, memoryLog, achievements, currentAdventure, enemies],
+  [
+    playerBaseStats,
+    playerInventory,
+    goalList,
+    memoryLog,
+    achievements,
+    currentAdventure,
+    enemies,
+    tab,
+  ],
   () => {
     saveGame()
   },
