@@ -514,6 +514,7 @@ const saveGame = () => {
     // 【追加】中断している冒険データも保存する
     currentAdventure: currentAdventure.value,
     enemies: enemies.value, // 敵の状態も保存
+    retory: tab.value,
   }
   localStorage.setItem(GAME_DATA_KEY, JSON.stringify(dataToSave))
 }
@@ -539,6 +540,7 @@ const loadGame = () => {
 
       if (parsedData.currentAdventure) currentAdventure.value = parsedData.currentAdventure
       if (parsedData.enemies) enemies.value = parsedData.enemies
+      if (parsedData.tab) tab.value = parsedData.tab
 
       // データがあり、名前も設定されていればホームへ
       if (playerBaseStats.value.name) {
