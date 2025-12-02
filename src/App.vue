@@ -1422,7 +1422,7 @@ const createMonsterAndStartBattle = () => {
       id: index,
       hp: 10,
       maxHp: 10,
-      attack: 15,
+      attack: 10,
       defense: 2,
       DEX: 90,
       evasion: 10,
@@ -2322,7 +2322,7 @@ const checkWinner = () => {
           v-if="playerBaseStats.exp >= 10"
           @click="upgradeStat('maxHp')"
           class="plus-button"
-          :disabled="tempStats.exp <= upgradeCost.maxHp"
+          :disabled="tempStats.exp < upgradeCost.maxHp"
         >
           +
         </button>
@@ -2343,7 +2343,7 @@ const checkWinner = () => {
           v-if="playerBaseStats.exp >= 10"
           @click="upgradeStat('maxMp')"
           class="plus-button"
-          :disabled="tempStats.exp <= upgradeCost.maxMp"
+          :disabled="tempStats.exp < upgradeCost.maxMp"
         >
           +
         </button>
@@ -2364,7 +2364,7 @@ const checkWinner = () => {
           v-if="playerBaseStats.exp >= 10"
           @click="upgradeStat('attack')"
           class="plus-button"
-          :disabled="tempStats.exp <= upgradeCost.attack"
+          :disabled="tempStats.exp < upgradeCost.attack"
         >
           +
         </button>
@@ -2384,7 +2384,7 @@ const checkWinner = () => {
           v-if="playerBaseStats.exp >= 10"
           @click="upgradeStat('defense')"
           class="plus-button"
-          :disabled="tempStats.exp <= upgradeCost.defense"
+          :disabled="tempStats.exp < upgradeCost.defense"
         >
           +
         </button>
@@ -2405,7 +2405,7 @@ const checkWinner = () => {
           v-if="playerBaseStats.exp >= 100"
           @click="upgradeStat('DEX')"
           class="plus-button"
-          :disabled="tempStats.exp <= upgradeCost.DEX"
+          :disabled="tempStats.exp < upgradeCost.DEX"
         >
           +
         </button>
@@ -2426,7 +2426,7 @@ const checkWinner = () => {
           v-if="playerBaseStats.exp >= 100"
           @click="upgradeStat('evasion')"
           class="plus-button"
-          :disabled="tempStats.exp <= upgradeCost.evasion"
+          :disabled="tempStats.exp < upgradeCost.evasion"
         >
           +
         </button>
