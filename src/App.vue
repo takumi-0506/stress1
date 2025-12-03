@@ -1422,7 +1422,7 @@ const createMonsterAndStartBattle = () => {
       id: index,
       hp: 10,
       maxHp: 10,
-      attack: 10,
+      attack: 5,
       defense: 2,
       DEX: 90,
       evasion: 10,
