@@ -1510,6 +1510,7 @@ const createMonsterAndStartBattle = () => {
     currentAdventure.value.eventName = eventName.value
     currentAdventure.value.thoughts = thoughts.value
     currentAdventure.value.emotions = { ...emotions.value }
+    currentAdventure.value.otherattackcount = 0
   }
   player.value = {
     name: playerBaseStats.value.name, // 基本ステータスの名前を参照
@@ -1793,6 +1794,7 @@ const confirmAttack = () => {
       currentAdventure.value.attackHistory.push(attackMoveName.value)
     }
     playerBaseStats.value.attackcount++
+    currentAdventure.value.otherattackcount++
     endPlayerTurn()
     return
   }
@@ -1800,6 +1802,7 @@ const confirmAttack = () => {
   let damage = calculateDamage(player.value, target)
   let isPenalty = false
   playerBaseStats.value.attackcount++
+  currentAdventure.value.otherattackcount++
 
   // 1. ペナルティ条件をチェック
   if (
@@ -1911,6 +1914,7 @@ const confirmMagicAttack = () => {
       currentAdventure.value.attackHistory.push(`${magicChant.value}`)
     }
     playerBaseStats.value.attackcount++
+    currentAdventure.value.otherattackcount++
 
     endPlayerTurn()
     return
@@ -1919,6 +1923,7 @@ const confirmMagicAttack = () => {
   let damage = spell.power + Math.floor(magicChant.value.length / 2)
   damage = Math.round(damage * (1 + (Math.random() - 0.5) * 0.2))
   playerBaseStats.value.attackcount++
+  currentAdventure.value.otherattackcount++
 
   // 属性倍率を計算
   const multiplier = getElementMultiplier(spell.element, target.element)
