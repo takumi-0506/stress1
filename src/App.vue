@@ -707,7 +707,7 @@ const achievements = ref({
 
   memory_collector_3: {
     name: '記録・マスター',
-    description: '冒険の記録を 100回 保存した',
+    description: '記録を 100回 保存した',
     unlocked: false,
     icon: '🏛️',
     reward: 100,
