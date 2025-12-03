@@ -1787,6 +1787,9 @@ const confirmAttack = () => {
   // 命中判定
   if (!checkHit(player.value, target)) {
     addLog(`しかし ${player.value.name} の攻撃は外れた！`)
+    if (currentAdventure.value) {
+      currentAdventure.value.attackHistory.push(attackMoveName.value)
+    }
     endPlayerTurn()
     return
   }
@@ -1900,6 +1903,9 @@ const confirmMagicAttack = () => {
   // console.log(playerBaseStats.value.magicattack)
   if (!checkHit(player.value, target)) {
     addLog(`しかし ${spell.name} は ${target.name} には当たらなかった！`)
+    if (currentAdventure.value) {
+      currentAdventure.value.attackHistory.push(`${magicChant.value}`)
+    }
     endPlayerTurn()
     return
   }
