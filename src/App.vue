@@ -61,6 +61,7 @@ const playerBaseStats = ref({
   battlesWon: 0,
   goalsCompleted: 0,
   positiveAttacksUsed: 0,
+  attackcount: 0,
 })
 const player = ref({}) // バトル中のインスタンス
 const tempStats = ref({}) // ステータス編集用の一時データ
@@ -539,6 +540,7 @@ const loadGame = () => {
 
       if (parsedData.currentAdventure) currentAdventure.value = parsedData.currentAdventure
       if (parsedData.enemies) enemies.value = parsedData.enemies
+      if (!playerBaseStats.value.attackcount) playerBaseStats.value.attackcount = 0
 
       // データがあり、名前も設定されていればホームへ
       if (playerBaseStats.value.name) {
@@ -1790,12 +1792,14 @@ const confirmAttack = () => {
     if (currentAdventure.value) {
       currentAdventure.value.attackHistory.push(attackMoveName.value)
     }
+    playerBaseStats.value.attackcount++
     endPlayerTurn()
     return
   }
   // let damage = calculateDamage(player.value, enemy.value)
   let damage = calculateDamage(player.value, target)
   let isPenalty = false
+  playerBaseStats.value.attackcount++
 
   // 1. ペナルティ条件をチェック
   if (
@@ -1906,12 +1910,15 @@ const confirmMagicAttack = () => {
     if (currentAdventure.value) {
       currentAdventure.value.attackHistory.push(`${magicChant.value}`)
     }
+    playerBaseStats.value.attackcount++
+
     endPlayerTurn()
     return
   }
 
   let damage = spell.power + Math.floor(magicChant.value.length / 2)
   damage = Math.round(damage * (1 + (Math.random() - 0.5) * 0.2))
+  playerBaseStats.value.attackcount++
 
   // 属性倍率を計算
   const multiplier = getElementMultiplier(spell.element, target.element)
