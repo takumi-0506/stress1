@@ -1113,7 +1113,8 @@ const addGoal = () => {
 
   if (parseInt(newGoal.value.priority) == 3) {
     //8~10
-    const rnd = Math.floor(Math.random() * 2) + 8
+    // const rnd = Math.floor(Math.random() * 2) + 8
+    const rnd = 50
     newGoal.value.exp = rnd
 
     //80~100
@@ -1121,7 +1122,8 @@ const addGoal = () => {
     newGoal.value.gold = rnd2
   } else if (parseInt(newGoal.value.priority) == 2) {
     //4~7
-    const rnd = Math.floor(Math.random() * 4) + 4
+    // const rnd = Math.floor(Math.random() * 4) + 30
+    const rnd = 30
     newGoal.value.exp = rnd
 
     //40~70
@@ -1129,7 +1131,9 @@ const addGoal = () => {
     newGoal.value.gold = rnd2
   } else if (parseInt(newGoal.value.priority) == 1) {
     //1~3
-    const rnd = Math.floor(Math.random() * 3) + 1
+    // const rnd = Math.floor(Math.random() * 21) + 10
+    const rnd = 10
+
     newGoal.value.exp = rnd
 
     //10~30
@@ -1422,8 +1426,8 @@ const createMonsterAndStartBattle = () => {
       id: index,
       hp: 10,
       maxHp: 10,
-      attack: 5,
-      defense: 2,
+      attack: 2,
+      defense: 1,
       DEX: 90,
       evasion: 10,
       exp: 30 + Math.floor(playerBaseStats.value.count / 5),
