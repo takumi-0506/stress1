@@ -2229,10 +2229,10 @@ const checkWinner = () => {
     <div v-if="currentScreen === 'home'" class="screen home-screen">
       <div class="home-layout">
         <div class="home-left">
-          <h3>今日の目標</h3>
+          <h3>今日のタスク</h3>
           <div class="goal-highlight">
             <span v-if="allCompleteGoal.length === 0" class="allcompletegoal"
-              >今日の目標はありません</span
+              >今日のタスクはありません</span
             >
             <li
               v-for="goal in topPriorityGoals"
@@ -2273,7 +2273,7 @@ const checkWinner = () => {
     </div>
 
     <div v-else-if="currentScreen === 'goalList'" class="screen goal-screen">
-      <h1>目標リスト</h1>
+      <h1>タスクリスト</h1>
 
       <form @submit.prevent="addGoal" class="goal-add-form">
         <div class="form-row">
@@ -2878,7 +2878,7 @@ const checkWinner = () => {
       ショップ
     </button>
     <button :class="{ active: currentScreen === 'goalList' }" @click="goToScreen('goalList')">
-      目標
+      タスク
     </button>
     <button :class="{ active: currentScreen === 'lookBack' }" @click="goToScreen('lookBack')">
       記録
