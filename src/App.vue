@@ -306,7 +306,7 @@ const selectedAdventure = ref(null)
 // 【追加】ツールチップ用のテキスト
 const tooltipText = ref('')
 
-// タスク追加フォーム用のデータ
+// 目標追加フォーム用のデータ
 const newGoal = ref({
   text: '',
   priority: 2,
@@ -839,9 +839,9 @@ const handleEmotionInput = (key, event) => {
   emotions.value[key] = value
 }
 
-// ホーム画面に表示する今日の目標（最初の未完了タスク）
+// ホーム画面に表示する今日の目標（最初の未完了目標）
 // const todaysGoal = computed(() => {
-//   return tasks.value.find((task) => !task.completed) || { text: '全てのタスク完了！' }
+//   return tasks.value.find((task) => !task.completed) || { text: '全ての目標完了！' }
 // })
 
 // 優先順位をテキストに変換するヘルパー
@@ -1105,10 +1105,10 @@ const completeGoal = (goal) => {
   if (playerBaseStats.value.goalsCompleted >= 100) unlockAchievement('goal_legend')
 }
 
-// タスク追加関数
+// 目標追加関数
 const addGoal = () => {
   if (!newGoal.value.text.trim()) {
-    alert('タスクの内容を入力してください。')
+    alert('目標の内容を入力してください。')
     return
   }
   // console.log(parseInt(newGoal.value.priority))
@@ -1158,9 +1158,9 @@ const addGoal = () => {
   newGoal.value.priority = 2
 }
 
-// タスク削除関数
+// 目標削除関数
 const deleteGoal = (goalId) => {
-  if (confirm('このタスクを削除しますか？')) {
+  if (confirm('この目標を削除しますか？')) {
     goalList.value = goalList.value.filter((goal) => goal.id !== goalId)
   }
 }
@@ -2229,10 +2229,10 @@ const checkWinner = () => {
     <div v-if="currentScreen === 'home'" class="screen home-screen">
       <div class="home-layout">
         <div class="home-left">
-          <h3>今日のタスク</h3>
+          <h3>今日の目標</h3>
           <div class="goal-highlight">
             <span v-if="allCompleteGoal.length === 0" class="allcompletegoal"
-              >今日のタスクはありません</span
+              >今日の目標はありません</span
             >
             <li
               v-for="goal in topPriorityGoals"
@@ -2273,11 +2273,11 @@ const checkWinner = () => {
     </div>
 
     <div v-else-if="currentScreen === 'goalList'" class="screen goal-screen">
-      <h1>タスクリスト</h1>
+      <h1>目標リスト</h1>
 
       <form @submit.prevent="addGoal" class="goal-add-form">
         <div class="form-row">
-          <label for="goal-text">タスク内容</label>
+          <label for="goal-text">目標内容</label>
           <input id="goal-text" type="text" v-model="newGoal.text" placeholder="例: 10分散歩する" />
         </div>
         <!-- <div class="form-row">
@@ -2292,7 +2292,7 @@ const checkWinner = () => {
             <option value="1">低</option>
           </select>
         </div>
-        <button type="submit" class="add-button">タスクを追加</button>
+        <button type="submit" class="add-button">目標を追加</button>
       </form>
 
       <hr class="divider" />
@@ -2878,7 +2878,7 @@ const checkWinner = () => {
       ショップ
     </button>
     <button :class="{ active: currentScreen === 'goalList' }" @click="goToScreen('goalList')">
-      タスク
+      目標
     </button>
     <button :class="{ active: currentScreen === 'lookBack' }" @click="goToScreen('lookBack')">
       記録
@@ -3592,7 +3592,7 @@ const checkWinner = () => {
   margin: 30px 0;
 }
 
-/* タスク追加フォーム */
+/* 目標追加フォーム */
 .goal-add-form {
   background-color: #fff;
   padding: 20px;
@@ -3645,7 +3645,7 @@ const checkWinner = () => {
   border-color: #3498db;
 }
 
-/* タスク一覧 */
+/* 目標一覧 */
 .goal-list {
   list-style: none;
   padding: 0;
