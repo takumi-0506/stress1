@@ -1,20 +1,3 @@
-<!-- <template>
-  <ColumnChart></ColumnChart> -->
-<!-- <HomeScreen></HomeScreen>
-</template> -->
-<!-- 
-<template>
-  <div>
-    <StressBattle></StressBattle>
-  </div>
-</template>
-
-<script setup>
-import StressBattle from './components/StressBattle.vue'
-
-// import ColumnChart from '@/components/ColumnChart.vue'
-// import HomeScreen from './components/HomeScreen.vue'
-</script> -->
 <script setup>
 import { ref, computed, nextTick, watch, onMounted } from 'vue'
 import monsterjoy from '@/assets/shinwa_kirke_circe.png'
@@ -37,18 +20,14 @@ import yusya1 from '@/assets/game_yuusya_woman.png'
 import magicgirl from '@/assets/mahoutsukai_woman.png'
 import sizin from '@/assets/music_ginyuu_shijin.png'
 
-// --- 画面管理 ---
 const currentScreen = ref('login') // 'home', 'statusEdit', 'eventInput', 'battle', 'goal'
 
 // --- プレイヤーデータ ---
 const playerBaseStats = ref({
   name: 'KAIT',
-  // maxHp: Math.floor(Math.random() * 10),
   avatar: '@/assets/yuusya_game.png', // デフォルトアバター
   maxHp: 50,
   maxMp: 10,
-  // attack: 5,
-  magicattack: 10,
   attack: 20,
   defense: 8,
   magicdefense: 10,
@@ -64,9 +43,9 @@ const playerBaseStats = ref({
   attackcount: 0,
 })
 const player = ref({}) // バトル中のインスタンス
-const tempStats = ref({}) // ステータス編集用の一時データ
+const tempStats = ref({}) // ステータス
 
-// 【追加】プレイヤーの所持アイテム
+// プレイヤーの所持アイテム
 const playerInventory = ref([])
 // プレイヤーが使える魔法
 const playerMagics = ref([
@@ -108,10 +87,10 @@ const playerMagics = ref([
     mpCost: 30,
     effect: 'damage',
     power: 50,
-    textpower: '攻撃力： +25\n属性：火\n',
+    textpower: '攻撃力： +50\n属性：火\n目の前のことに集中する',
 
     element: 'fire',
-    description: '中火',
+    description: '目の前のことに集中する',
   },
   {
     id: 5,
@@ -119,10 +98,10 @@ const playerMagics = ref([
     mpCost: 30,
     effect: 'damage',
     power: 50,
-    textpower: '攻撃力： +25\n属性：水\n',
+    textpower: '攻撃力： +50\n属性：水\nストレス反応への対処法',
 
     element: 'water',
-    description: '中水',
+    description: 'ストレス反応への対処法',
   },
   {
     id: 6,
@@ -130,7 +109,7 @@ const playerMagics = ref([
     mpCost: 30,
     effect: 'damage',
     power: 50,
-    textpower: '攻撃力： +25\n属性：木\n',
+    textpower: '攻撃力： +50\n属性：木\n',
 
     element: 'wood',
     description: '中木',
@@ -141,10 +120,10 @@ const playerMagics = ref([
     mpCost: 100,
     effect: 'damage',
     power: 100,
-    textpower: '攻撃力： +25\n属性：火\n',
+    textpower: '攻撃力： +100\n属性：火\n運動をすることでネガティブな気分を発散できる',
 
     element: 'fire',
-    description: '大火',
+    description: '運動をすることでネガティブな気分を発散できる',
   },
   {
     id: 8,
@@ -152,10 +131,10 @@ const playerMagics = ref([
     mpCost: 100,
     effect: 'damage',
     power: 100,
-    textpower: '攻撃力： +25\n属性：水\n',
+    textpower: '攻撃力： +100\n属性：水\n思考や感情を紙に書きだす',
 
     element: 'water',
-    description: '大水',
+    description: '思考や感情を紙に書きだす',
   },
   {
     id: 9,
@@ -163,14 +142,14 @@ const playerMagics = ref([
     mpCost: 100,
     effect: 'damage',
     power: 100,
-    textpower: '攻撃力： +25\n属性：木\n',
+    textpower: '攻撃力： +100\n属性：木\n自分に対して思いやりを持つ',
 
     element: 'wood',
-    description: '大木',
+    description: '自分に対して思いやりを持つ',
   },
 ])
 
-// 【追加】お店で販売するアイテムのリスト
+// お店で販売するアイテムのリスト
 const shopItems = ref([
   {
     id: 1,
@@ -254,12 +233,11 @@ const shopItems = ref([
   },
 ])
 
-// 【変更】enemyを複数形に
+// enemyを複数形に
 const enemies = ref([])
 const alldamage = ref('')
 
 // --- モンスターデータ ---
-// const enemy = ref({})
 const eventName = ref('')
 const thoughts = ref('')
 const emotions = ref({
@@ -290,20 +268,16 @@ const emotionLabels = {
   anger: '怒り',
 }
 
-// --- 目標管理データ ---
 // 目標リストのデータ
-// goalListのデータ構造変更
 const goalList = ref([])
 
 // 全記録を保存する配列
 const memoryLog = ref([])
-// 現在進行中のデータを一時的に保持するオブジェクト
 const currentAdventure = ref(null)
 
-// ポップアップで表示する冒険データ
 const selectedAdventure = ref(null)
 
-// 【追加】ツールチップ用のテキスト
+// ツールチップ用のテキスト
 const tooltipText = ref('')
 
 // 目標追加フォーム用のデータ
@@ -317,7 +291,7 @@ const sortOrder = ref('desc') // 'desc' (高い順), 'asc' (低い順)
 
 // ステータス強化のコスト
 const upgradeCost = {
-  maxHp: 10, // 1回強化するのに20 EXP必要
+  maxHp: 10, // 1回強化するのに10 EXP必要
   maxMp: 10,
   attack: 10,
   defense: 10,
@@ -325,24 +299,11 @@ const upgradeCost = {
   evasion: 100,
 }
 
-// const itemCost = {
-//   yaku: 100,
-// }
-
-// const tasks = ref([
-//   { id: 1, text: '散歩する', completed: true },
-//   { id: 2, text: '新しい技術を学ぶ', completed: false },
-//   { id: 3, text: '部屋の掃除をする', completed: false },
-// ])
-// const newTaskText = ref('')
-
-// --- バトルロジック用データ ---
 const battleLog = ref([])
 const isPlayerTurn = ref(true)
 const isBattleOver = ref(false)
 const gameMessage = ref('')
 const isWaitingForInput = ref(false)
-// const attackMoveName = ref('')
 const isLogVisible = ref(false)
 const didPlayerWin = ref(false)
 
@@ -350,8 +311,6 @@ const didPlayerWin = ref(false)
 const isEmotionLogVisible = ref(false)
 // ログのオン／オフ
 const Logmanual = ref(false)
-
-// const positiveWords = ref(['勇気', '勝つ', '未来', '信じる', '友達', '守る', '笑顔', '相談'])
 
 const positiveWords = ref([
   'ありがとう',
@@ -458,33 +417,24 @@ const positiveWords = ref([
   '挽回',
 ])
 
-// const attackHistory = ref([])
 
-// 出来事の送信状態を管理
 const isSubmittingEvent = ref(true)
 
-// 【変更】UIの状態管理をより詳細に
+
 const playerActionState = ref('selecting_command') // 'selecting_command', 'inputting_attack', 'selecting_magic', 'inputting_magic', 'selecting_item'
 const attackMoveName = ref('')
 const magicChant = ref('')
 const selectedSpell = ref(null)
-const selectedTargetIndex = ref(null) // 【追加】ターゲット選択用
+const selectedTargetIndex = ref(null) // ターゲット選択用
 
-// 【追加】属性アイコンのマッピング
+// 属性アイコンのマッピング
 const elementIcons = {
   fire: '🔥',
   water: '💧',
   wood: '🌳',
 }
 
-// import monsterjoy from '@/assets/shinwa_kirke_circe.png'
-// import monsteranger from '@/assets/character_cthulhu_night_gaunts.png'
-// import monstersurprise from '@/assets/fantasy_orc.png'
-// import monsterdisgust from '@/assets/fantasy_dragon_wyvern.png'
-// import monstersorrow from '@/assets/fantasy_harpy.png'
-// import monsteranxiety from '@/assets/fantasy_dullahan.png'
-
-// 【追加】モンスター画像のマッピング
+// モンスター画像
 const monsterImages = {
   anger: monsteranger,
   sorrow: monstersorrow,
@@ -493,7 +443,7 @@ const monsterImages = {
   surprise: monstersurprise,
   disgust: monsterdisgust,
   neutral: monsteranger,
-  default: monsteranger, // 汎用的なモンスター画像
+  default: monsteranger, // モンスター画像
 }
 
 const newPlayerName = ref('')
@@ -503,7 +453,7 @@ const avatarOptions = ref([yusya, yusya1, magicgirl, sizin])
 // --- ロード & セーブ機能 ---
 const GAME_DATA_KEY = 'myAdventureGameData'
 
-// 【追加】ゲーム保存関数
+// ゲーム保存関数
 const saveGame = () => {
   const dataToSave = {
     playerBaseStats: playerBaseStats.value,
@@ -511,8 +461,6 @@ const saveGame = () => {
     goalList: goalList.value,
     memoryLog: memoryLog.value,
     achievements: achievements.value,
-    // currentScreen: currentScreen.value,
-    // 中断している冒険データも保存する
     currentAdventure: currentAdventure.value,
     enemies: enemies.value, // 敵の状態も保存
   }
@@ -525,42 +473,33 @@ const loadGame = () => {
   if (savedData) {
     try {
       const parsedData = JSON.parse(savedData)
-      // 【変更】ロード時に name が存在するかチェック
       if (parsedData.playerBaseStats && parsedData.playerBaseStats.name) {
         playerBaseStats.value = { ...playerBaseStats.value, ...parsedData.playerBaseStats }
         isSubmittingEvent.value = false // ボタンを非表示にする
       }
-      // データが存在する場合のみ復元
       if (parsedData.playerBaseStats) playerBaseStats.value = parsedData.playerBaseStats
       if (parsedData.playerInventory) playerInventory.value = parsedData.playerInventory
       if (parsedData.goalList) goalList.value = parsedData.goalList
       if (parsedData.memoryLog) memoryLog.value = parsedData.memoryLog
       if (parsedData.achievements) achievements.value = parsedData.achievements
-      // if (parsedData.currentScreen) currentScreen.value = parsedData.currentScreen
-
       if (parsedData.currentAdventure) currentAdventure.value = parsedData.currentAdventure
       if (parsedData.enemies) enemies.value = parsedData.enemies
       if (!playerBaseStats.value.attackcount) playerBaseStats.value.attackcount = 0
 
-      // データがあり、名前も設定されていればホームへ
       if (playerBaseStats.value.name) {
         goToScreen('home')
       }
-      // } else {
-      //   // データはあるが名前がない（古いセーブデータ）の場合
-      //   newPlayerAvatar.value = playerBaseStats.value.avatar // ロードしたアバターを選択状態に
-      //   goToScreen('nameInput')
-      // }
+
     } catch (e) {
       console.error('セーブデータの読み込みに失敗しました:', e)
-      localStorage.removeItem(GAME_DATA_KEY) // 壊れたデータを削除
+      localStorage.removeItem(GAME_DATA_KEY)
     }
   }
 }
 
-// 【追加】実績データ
+// 実績データ
 const achievements = ref({
-  // --- ROW 1 (Easy) ---
+  // --- ROW 1 ---
   first_win: {
     name: '初めての勝利',
     description: 'モンスターを初めて倒した',
@@ -598,7 +537,7 @@ const achievements = ref({
     reward: 30,
   },
 
-  // --- ROW 2 (Medium) ---
+  // --- ROW 2 ---
   battle_novice: {
     name: 'ストレス・ルーキー',
     description: 'バトルで 15回 勝利した',
@@ -637,7 +576,7 @@ const achievements = ref({
     reward: 50,
   },
 
-  // --- ROW 3 (Hard) ---
+  // --- ROW 3 ---
   battle_veteran: {
     name: 'ストレス・バスター',
     description: 'バトルで 70回 勝利した',
@@ -675,7 +614,7 @@ const achievements = ref({
     reward: 70,
   },
 
-  // --- ROW 4 (Very Hard) ---
+  // --- ROW 4 ---
   battle_master: {
     name: 'ストレス・マスター',
     description: 'バトルで 100回 勝利した',
@@ -713,10 +652,10 @@ const achievements = ref({
     reward: 100,
   },
 })
-// 【追加】実績解除通知用
+// 実績解除通知用
 const achievementToast = ref(null)
 
-// 【追加】実績の達成条件マッピング
+// 実績の達成条件マッピング
 const achievementRequirements = {
   first_win: { stat: 'battlesWon', target: 1, unit: '回' },
   first_goal: { stat: 'goalsCompleted', target: 1, unit: '個' },
@@ -743,7 +682,7 @@ const achievementRequirements = {
   positive_legend: { stat: 'positiveAttacksUsed', target: 100, unit: '回' },
 }
 
-// 【追加】実績の進捗情報を取得する関数
+// 実績の進捗情報を取得する関数
 const getAchievementProgress = (id) => {
   const req = achievementRequirements[id]
   if (!req) return null
@@ -758,12 +697,10 @@ const getAchievementProgress = (id) => {
     rawCurrent = playerBaseStats.value[req.stat] || 0
   }
 
-  // 「初めてのお買い物」は、totalGoldSpentが0より大きければ1回と見なす
   if (id === 'first_purchase') {
     rawCurrent = rawCurrent > 0 ? 1 : 0
   }
 
-  // 表示する現在値を目標値でキャップする (例: 6/5ではなく5/5と表示)
   const displayCurrentValue = Math.min(rawCurrent, target)
 
   return {
@@ -787,7 +724,6 @@ watch(
   async () => {
     await nextTick()
     if (isLogVisible.value) {
-      // ↓ この条件分岐をなくし、要素の存在チェックだけに絞る
       const logEl = document.querySelector('.battle-log')
       if (logEl) {
         logEl.scrollTop = logEl.scrollHeight
@@ -797,12 +733,10 @@ watch(
   { deep: true },
 )
 
-// 【追加】アプリ起動時に一度だけロードを実行
 onMounted(() => {
   loadGame()
 })
 
-// --- computed プロパティ ---
 const playerHpBar = computed(() => ({
   width: player.value.maxHp > 0 ? `${(player.value.hp / player.value.maxHp) * 100}%` : '0%',
 }))
@@ -811,11 +745,6 @@ const playerMpBar = computed(() => ({
   width: player.value.maxMp > 0 ? `${(player.value.mp / player.value.maxMp) * 100}%` : '0%',
 }))
 
-// const enemyHpBar = computed(() => ({
-//   width: enemy.value.maxHp > 0 ? `${(enemy.value.hp / enemy.value.maxHp) * 100}%` : '0%',
-// }))
-
-// --- 感情の数値入力をバリデーションする関数 ---
 const handleEmotionInput = (key, event) => {
   let value = parseInt(event.target.value, 10)
 
@@ -826,7 +755,6 @@ const handleEmotionInput = (key, event) => {
 
   // 100より大きい値が入力された場合、100に丸める
   if (value > 100) {
-    // alert('入力は100以下')
     value = 100
   }
 
@@ -835,16 +763,10 @@ const handleEmotionInput = (key, event) => {
     value = 0
   }
 
-  // データを更新（これによりスライダーも連動して動く）
   emotions.value[key] = value
 }
 
-// ホーム画面に表示する今日の目標（最初の未完了目標）
-// const todaysGoal = computed(() => {
-//   return tasks.value.find((task) => !task.completed) || { text: '全ての目標完了！' }
-// })
 
-// 優先順位をテキストに変換するヘルパー
 const priorityText = {
   3: '高',
   2: '中',
@@ -890,10 +812,6 @@ const handlePostBattleEmotionInput = (key, event) => {
 }
 
 const savePostBattleEmotions = () => {
-  // console.log('勝利後の感情が記録されました:', postBattleEmotions.value)
-  // 本来はここでデータベースなどに保存する
-  // isEmotionLogVisible.value = false // ポップアップを閉じる
-
   if (
     postBattleEmotions.value.joy === 0 &&
     postBattleEmotions.value.surprise === 0 &&
@@ -906,14 +824,13 @@ const savePostBattleEmotions = () => {
     return
   }
 
-  // 【変更】現在の冒険データに勝利後の感情を記録
+  // 現在のデータに勝利後の感情を記録
   if (currentAdventure.value) {
     currentAdventure.value.postBattleEmotions = { ...postBattleEmotions.value }
   }
   isEmotionLogVisible.value = false
 }
 
-// --- ナビゲーション関数 ---
 const goToScreen = (screenName) => {
   if (screenName === 'eventInput') {
     eventName.value = ''
@@ -933,7 +850,6 @@ const goToScreen = (screenName) => {
   currentScreen.value = screenName
 }
 
-// 【追加】日付をフォーマットする関数
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
@@ -942,31 +858,16 @@ const formatDate = (dateString) => {
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}/${month}/${day}`
 }
-// 冒険の記録を確定し、ホームに戻る関数
-// const finalizeAdventure = () => {
-//   if (currentAdventure.value) {
-//     currentAdventure.value.recordedDate = new Date().toISOString() // 日付を記録
-//     memoryLog.value.push(currentAdventure.value)
-//   }
-//   currentAdventure.value = null // 現在の冒険データをリセット
-//   isSubmittingEvent.value = false // ボタンを再表示
-//   goToScreen('home')
-// }
+
 const finalizeAdventure = () => {
   if (currentAdventure.value) {
     currentAdventure.value.recordedDate = new Date().toISOString()
     memoryLog.value.push(currentAdventure.value)
 
-    // 実績チェック
-    // if (memoryLog.value.length >= 3) {
-    //   unlockAchievement('memory_collector')
-    // }
     unlockAchievement('first_memory')
     if (memoryLog.value.length >= 25) unlockAchievement('memory_collector_1')
     if (memoryLog.value.length >= 70) unlockAchievement('memory_collector_2')
     if (memoryLog.value.length >= 100) unlockAchievement('memory_collector_3')
-    // バトル後のアイテム状態を永続データに反映
-    // playerInventory.value = JSON.parse(JSON.stringify(player.value.inventory))
   }
   tab.value = true
   currentAdventure.value = null
@@ -995,8 +896,6 @@ const downgradeStat = (statName) => {
   const cost = upgradeCost[statName]
   const basestates = playerBaseStats.value[statName]
   const templatestates = tempStats.value[statName]
-  // console.log(playerBaseStats.value.exp)
-  // console.log(tempStats.value.exp)
   if (templatestates > basestates) {
     // ステータスによって上昇値を変える
     tempStats.value.exp += cost // 一時的なEXPを減らす
@@ -1008,9 +907,7 @@ const downgradeStat = (statName) => {
     } else {
       tempStats.value[statName] -= 1
     }
-  } else {
-    // alert('経験値が足りません')
-  }
+  } 
 }
 
 // 実績解除の管理関数
@@ -1050,10 +947,6 @@ const buyitem = (itemName) => {
       playerBaseStats.value.totalGoldSpent += itemName.price // 累計消費を更新
       alert(`${itemName.name} を購入しました！`)
 
-      // 実績チェック
-      // if (playerBaseStats.value.totalGoldSpent >= 500) {
-      //   unlockAchievement('high_spender')
-      // }
 
       existingItem.quantity += 1 // 持っていれば個数を増やす
     } else if (existingItem.quantity >= 99) {
@@ -1061,7 +954,6 @@ const buyitem = (itemName) => {
     }
   } else {
     // 持っていなければ新しく追加
-    // 【変更】購入時に画像パスも含めるように
     playerBaseStats.value.gold -= itemName.price
     playerBaseStats.value.totalGoldSpent += itemName.price // 累計消費を更新
 
@@ -1071,15 +963,14 @@ const buyitem = (itemName) => {
       quantity: 1,
       effect: itemName.effect,
       power: itemName.power,
-      price: itemName.price, // priceも入れておくと後で売却機能追加時に便利かも
+      price: itemName.price, 
       description: itemName.description,
       relaxingeffect: itemName.relaxingeffect,
-      image: itemName.image, // 画像パスをコピー
+      image: itemName.image,
       targetStat: itemName.targetStat, // ステータス系アイテム用
       duration: itemName.duration, // ステータス系アイテム用
     })
     alert(`${itemName.name} を購入しました！`)
-    // 実績チェック
   }
   unlockAchievement('first_purchase')
   if (playerBaseStats.value.totalGoldSpent >= 2500) unlockAchievement('shopper')
@@ -1097,7 +988,6 @@ const completeGoal = (goal) => {
   alert(`「${goal.text}」を達成！ ${goal.exp} EXP と ${goal.gold} G を獲得しました。`)
 
   // 実績チェック
-  // unlockAchievement('first_goal')
   playerBaseStats.value.goalsCompleted++
   unlockAchievement('first_goal')
   if (playerBaseStats.value.goalsCompleted >= 35) unlockAchievement('goal_setter')
@@ -1111,11 +1001,9 @@ const addGoal = () => {
     alert('目標の内容を入力してください。')
     return
   }
-  // console.log(parseInt(newGoal.value.priority))
 
   if (parseInt(newGoal.value.priority) == 3) {
     //8~10
-    // const rnd = Math.floor(Math.random() * 2) + 8
     const rnd = 50
     newGoal.value.exp = rnd
 
@@ -1124,7 +1012,6 @@ const addGoal = () => {
     newGoal.value.gold = rnd2
   } else if (parseInt(newGoal.value.priority) == 2) {
     //4~7
-    // const rnd = Math.floor(Math.random() * 4) + 30
     const rnd = 30
     newGoal.value.exp = rnd
 
@@ -1133,7 +1020,6 @@ const addGoal = () => {
     newGoal.value.gold = rnd2
   } else if (parseInt(newGoal.value.priority) == 1) {
     //1~3
-    // const rnd = Math.floor(Math.random() * 21) + 10
     const rnd = 10
 
     newGoal.value.exp = rnd
@@ -1144,7 +1030,7 @@ const addGoal = () => {
   }
 
   goalList.value.push({
-    id: Date.now(), // ユニークなIDを生成
+    id: Date.now(), 
     text: newGoal.value.text,
     exp: newGoal.value.exp,
     gold: newGoal.value.gold,
@@ -1154,7 +1040,6 @@ const addGoal = () => {
 
   // フォームをリセット
   newGoal.value.text = ''
-  // newGoal.value.exp = 10
   newGoal.value.priority = 2
 }
 
@@ -1170,32 +1055,10 @@ const sortGoals = (order) => {
   sortOrder.value = order
 }
 
-// データの初期化処理を追加
-// const startEventInput = () => {
-//   eventName.value = ''
-//   thoughts.value = ''
-//   Object.keys(emotions.value).forEach((key) => (emotions.value[key] = 0))
-//   isSubmittingEvent.value = false // ボタンを再表示
 
-//   currentAdventure.value = {
-//     id: Date.now(),
-//     eventName: '',
-//     thoughts: '',
-//     emotions: {},
-//     attackHistory: [],
-//     postBattleEmotions: null,
-//   }
-
-//   goToScreen('eventInput')
-// }
-// const invent1 = ref([])
-// 【変更】冒険の記録保存時に実績チェック
 
 const openInvent = () => {
-  // tempStats.value = { ...playerBaseStats.value }
-
-  // invent1.value = { inventory: JSON.parse(JSON.stringify(playerInventory.value)) }
-  // invent1.value = invent1.value.filter((invent1) => invent1.quantity <= 0)
+  
   goToScreen('Invent')
 }
 
@@ -1220,28 +1083,6 @@ const back = () => {
   isSubmittingEvent.value = false // ボタンを再表示
 }
 
-// --- 目標管理関数 ---
-// const addTask = () => {
-//   if (newTaskText.value.trim()) {
-//     tasks.value.push({
-//       id: Date.now(),
-//       text: newTaskText.value.trim(),
-//       completed: false,
-//     })
-//     newTaskText.value = ''
-//   }
-// }
-
-// const toggleTask = (id) => {
-//   const task = tasks.value.find((t) => t.id === id)
-//   if (task) {
-//     task.completed = !task.completed
-//   }
-// }
-
-// const removeTask = (id) => {
-//   tasks.value = tasks.value.filter((t) => t.id !== id)
-// }
 
 // ポップアップ操作用の関数
 const openMemoryPopup = (adventure) => {
@@ -1251,56 +1092,17 @@ const closeMemoryPopup = () => {
   selectedAdventure.value = null
 }
 
-// --- バトルロジック ---
-// const getMonsterImage = () => {
-//   let highestEmotion = 'default'
-//   let maxValue = -1
 
-//   for (const [emotion, value] of Object.entries(emotions.value)) {
-//     if (value > maxValue) {
-//       maxValue = value
-//       highestEmotion = emotion
-//     }
-//   }
-
-//   switch (highestEmotion) {
-//     case 'anger':
-//       return monsterjoy
-//     case 'sorrow':
-//       return monsteranger
-//     case 'joy':
-//       return monstersurprise
-//     case 'disgust':
-//       return monsterdisgust
-//     case 'sprrow':
-//       return monstersorrow
-//     default:
-//       return monsteranxiety
-//   }
-//   // プレースホルダーを返す（画像インポートがコメントアウトされているため）
-//   // return null;
-// }
 // ログ表示を手動で切り替える関数
 const toggleLogView = () => {
   if (isBattleOver.value) return // バトル終了後は切り替え不可
   isLogVisible.value = !isLogVisible.value
   Logmanual.value = true
 
-  // 【変更】ログ表示に切り替わった場合もスクロール
-  // if (isLogVisible.value) {
-  //   nextTick(() => {
-  //     const logEl = document.querySelector('.battle-log')
-  //     if (logEl) logEl.scrollTop = logEl.scrollHeight
-  //   })
-  // }
+ 
 }
 
-// const confirmback = () => {
-//   isWaitingForInput.value = false // 技名入力状態を解除
-//   attackMoveName.value = '' // 入力中のテキストをリセット
-// }
 
-// 【修正】UIの状態をリセットするための関数
 const returnToCommandSelect = () => {
   playerActionState.value = 'selecting_command'
   attackMoveName.value = ''
@@ -1322,44 +1124,13 @@ const setPlayerName = () => {
 const tab = ref(true)
 
 const retreatToHome = () => {
-  // 冒険データ(currentAdventure)と敵データ(enemies)は保持したままホームに戻る
   isSubmittingEvent.value = false
   tab.value = false
   goToScreen('home')
 }
 
 const createMonsterAndStartBattle = () => {
-  /*  if (!eventName.value.trim()) {
-    alert('出来事の名前を入力してください。')
-    return
-  }
-  isSubmittingEvent.value = true // ボタンを非表示にする
-
-  const newMonster = {
-    name: eventName.value,
-    thoughts: thoughts.value,
-    maxHp: 80,
-    attack: 0,
-    magicattack: 10,
-    defense: 5,
-    magicdefense: 10,
-    DEX: 80,
-    EVA: 10,
-    image: getMonsterImage(),
-    exp: 1,
-  }
-  newMonster.hp = newMonster.maxHp
-  enemy.value = newMonster
-
-  // 【変更】現在の冒険データに入力内容を保存
-  if (currentAdventure.value) {
-    currentAdventure.value.eventName = eventName.value
-    currentAdventure.value.thoughts = thoughts.value
-    currentAdventure.value.emotions = { ...emotions.value }
-  }*/
-
-  // 【変更】モンスター生成ロジック
-  // const createMonsterAndStartBattle = () => {
+  
   if (
     !eventName.value.trim() &&
     emotions.value.joy === 0 &&
@@ -1398,24 +1169,7 @@ const createMonsterAndStartBattle = () => {
     .slice(0, 3)
 
   const newEnemies = []
-  // if (dominantEmotions.length === 0) {
-  //   // 強い感情がない場合、通常モンスターを1体生成
-  //   newEnemies.push({
-  //     id: 1,
-  //     name: `${eventName.value}`,
-  //     hp: 80,
-  //     maxHp: 80,
-  //     attack: 10,
-  //     defense: 5,
-  //     DEX: 90,
-  //     evasion: 10,
-  //     element: 'neutral',
-  //     exp: 30,
-  //     gold: 20,
-  //     image: monsterImages.neutral,
-  //   })
-  // } else {
-
+  
   const randomstatusjoy = Math.floor(Math.random() * playerBaseStats.value.count) + 1
   const randomstatusanger = Math.floor(Math.random() * playerBaseStats.value.count) + 1
   const randomstatussorrow = Math.floor(Math.random() * playerBaseStats.value.count) + 1
@@ -1492,18 +1246,9 @@ const createMonsterAndStartBattle = () => {
       monster.attack += 5 * randomstatusdisgust
       monster.defense += 5 * randomstatusdisgust
       monster.image = monsterImages.disgust
-    } //else {
-    //   monster.name = `${eventName.value}幻影 ${index + 1}`
-    //   monster.element = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
-    //   monster.maxHp += 5 * randomstatus
-    //   monster.hp += 5 * randomstatus
-
-    //   monster.attack += 5 * randomstatus
-    //   monster.defense += 5 * randomstatus
-    // }
+    } 
     newEnemies.push(monster)
   })
-  //}
   enemies.value = newEnemies
 
   if (currentAdventure.value) {
@@ -1519,11 +1264,10 @@ const createMonsterAndStartBattle = () => {
     hp: playerBaseStats.value.maxHp,
     mp: playerBaseStats.value.maxMp, // MPを初期化
     isDefending: false,
-    // inventory: JSON.parse(JSON.stringify(playerInventory.value)), // アイテムをディープコピー
-    magic: JSON.parse(JSON.stringify(playerMagics.value)), // 魔法をディープコピー
-    // 【追加】ステータス上昇効果を初期化
+    magic: JSON.parse(JSON.stringify(playerMagics.value)), 
+    // ステータス上昇効果を初期化
     boosts: { attack: 0, defense: 0, DEX: 0, evasion: 0, duration: 0 },
-    lastCommand: null, // 【追加】最後に選択したコマンド
+    lastCommand: null, // 最後に選択したコマンド
   }
 
   battleLog.value = []
@@ -1532,12 +1276,11 @@ const createMonsterAndStartBattle = () => {
   gameMessage.value = ''
   isWaitingForInput.value = false
   attackMoveName.value = ''
-  returnToCommandSelect() // UI状態をリセット
+  returnToCommandSelect()
 
   isLogVisible.value = false
 
-  // attackHistory.value = [] // 攻撃履歴をリセット
-  // console.log(playerBaseStats.value.attack)
+
   addLog(`あなたの感情から「${eventName.value}」が生まれた！`, 'system')
   isLogVisible.value = true
 
@@ -1547,7 +1290,7 @@ const createMonsterAndStartBattle = () => {
   goToScreen('battle')
 }
 
-// 【追加】属性相性によるダメージ倍率を計算
+// 属性相性によるダメージ倍率
 const getElementMultiplier = (attackElement, targetElement) => {
   if (attackElement === 'neutral' || !attackElement || !targetElement) return 1.0
   if (attackElement === 'fire' && targetElement === 'wood') return 1.5
@@ -1559,24 +1302,19 @@ const getElementMultiplier = (attackElement, targetElement) => {
   return 1.0
 }
 
-// addLog関数からスクロール処理
 const addLog = (message, type = 'normal') => {
   battleLog.value.push({ text: message, type: type })
 }
 
 const checkHit = (attacker, target) => {
-  // もしaccuracyやevasionが未設定でも、デフォルト値を使って計算がNaNになるのを防ぐ
-  // console.log(attacker.DEX)
-  // console.log(target.evasion)
+
   const totalAccuracy = (attacker.DEX || 100) + (attacker.boosts?.DEX || 0)
   const totalEvasion = (target.evasion || 5) + (target.boosts?.evasion || 0)
   const hitChance = (totalAccuracy - totalEvasion) / 100
   return Math.random() < hitChance
 }
 
-// 【追加】再挑戦（ホームから）用の関数
 const resumeBattle = () => {
-  // プレイヤー情報を現在のステータスで再初期化（強化反映）
   player.value = {
     name: playerBaseStats.value.name,
     avatar: playerBaseStats.value.avatar,
@@ -1593,7 +1331,6 @@ const resumeBattle = () => {
     hp: enemy.maxHp,
   }))
 
-  // 敵は `enemies.value` をそのまま使う（HPは減ったまま）
 
   battleLog.value = []
   isPlayerTurn.value = true
@@ -1630,7 +1367,7 @@ const retryBattle = () => {
   battleLog.value = []
 
   if (currentAdventure.value) {
-    currentAdventure.value.attackHistory = [] // 【変更】攻撃履歴のみリセット
+    currentAdventure.value.attackHistory = [] // 攻撃履歴のみリセット
   }
   addLog(`${player.value.name}は再び立ち上がった！`, 'positive')
   setTimeout(() => {
@@ -1638,18 +1375,8 @@ const retryBattle = () => {
   }, 1500)
 }
 
-// const playerAction = (action) => {
-//   if (!isPlayerTurn.value || isBattleOver.value) return
-//   if (action === 'attack') {
-//     isWaitingForInput.value = true
-//   } else if (action === 'defend') {
-//     player.value.isDefending = true
-//     addLog(`${player.value.name} は防御の姿勢をとった！`)
-//     endPlayerTurn()
-//   }
-// }
 
-// 【追加】ツールチップ操作用の関数
+
 const showTooltip = (description) => {
   tooltipText.value = description
 }
@@ -1669,21 +1396,7 @@ const hiddenTooltipmagic = () => {
   tooltipdescription.value = ''
 }
 
-// 【変更】コマンド選択処理
-// const selectCommand = (command) => {
-//   if (!isPlayerTurn.value || isBattleOver.value) return
 
-//   if (command === 'attack' || command === 'magic') {
-//     playerActionState.value = 'selecting_target'
-//   } else if (command === 'defend') {
-//     player.value.isDefending = true
-//     addLog(`${player.value.name} は精神を集中させ、防御の姿勢をとった！`)
-//     endPlayerTurn()
-//   } else if (command === 'item') {
-//     playerActionState.value = 'selecting_item'
-//   }
-// }
-// 【修正】選択したコマンドを記憶
 const selectCommand = (command) => {
   Logmanual.value = false
   if (!isPlayerTurn.value || isBattleOver.value) return
@@ -1701,17 +1414,7 @@ const selectCommand = (command) => {
   }
 }
 
-// 【追加】ターゲット選択関数
-// const selectTarget = (index) => {
-//   if (playerActionState.value !== 'selecting_target') return
-//   selectedTargetIndex.value = index
 
-//   if (player.value.lastCommand === 'attack') {
-//     playerActionState.value = 'inputting_attack'
-//   } else if (player.value.lastCommand === 'magic') {
-//     playerActionState.value = 'selecting_magic'
-//   }
-// }
 
 const selectTarget = (index) => {
   if (playerActionState.value !== 'selecting_target') return
@@ -1727,59 +1430,7 @@ const selectTarget = (index) => {
   }
 }
 
-// const confirmAttack = () => {
-//   if (!attackMoveName.value.trim()) {
-//     alert('入力してください！')
-//     return
-//   }
-//   const damage = calculateDamage(player.value, enemy.value)
-//   enemy.value.hp = Math.max(0, enemy.value.hp - damage)
-//   addLog(
-//     `${player.value.name} の「${attackMoveName.value}」！ ${enemy.value.name} に ${damage} のダメージ！`,
-//     'player-action',
-//   )
-//   isWaitingForInput.value = false
-//   attackMoveName.value = ''
-//   endPlayerTurn()
-// }
-// 【変更】confirmAttack関数にボーナスロジックを追加
-// const confirmAttack = () => {
-//   if (!attackMoveName.value.trim()) {
-//     alert('技名を入力してください！')
-//     return
-//   }
 
-//   // 1. まず基本ダメージを計算
-//   let damage = calculateDamage(player.value, enemy.value)
-//   let isPositive = false
-
-//   // 2. ポジティブな単語が含まれているかチェック
-//   for (const word of positiveWords.value) {
-//     if (attackMoveName.value.includes(word)) {
-//       isPositive = true
-//       break // 1つでも見つかればチェック終了
-//     }
-//   }
-
-//   // 3. もしポジティブなら、ダメージを1.5倍にし、ログを追加
-//   if (isPositive) {
-//     addLog('ポジティブな言葉の力で攻撃が強化された！', 'positive')
-//     damage = Math.floor(damage * 2)
-//   }
-
-//   // 4. 最終ダメージで敵のHPを減らす
-//   enemy.value.hp = Math.max(0, enemy.value.hp - damage)
-//   addLog(
-//     `${player.value.name} の「${attackMoveName.value}」！ ${enemy.value.name} に ${damage} のダメージ！`,
-//     'player-action',
-//   )
-
-//   isWaitingForInput.value = false
-//   attackMoveName.value = ''
-//   endPlayerTurn()
-// }
-
-// 【変更】confirmAttack関数にペナルティロジックを追加
 const confirmAttack = () => {
   const moveName = attackMoveName.value.trim() // 最初に入力値から空白を除去
   const target = enemies.value[selectedTargetIndex.value]
@@ -1798,13 +1449,11 @@ const confirmAttack = () => {
     endPlayerTurn()
     return
   }
-  // let damage = calculateDamage(player.value, enemy.value)
   let damage = calculateDamage(player.value, target)
   let isPenalty = false
   playerBaseStats.value.attackcount++
   currentAdventure.value.otherattackcount++
 
-  // 1. ペナルティ条件をチェック
   if (
     currentAdventure.value &&
     currentAdventure.value.attackHistory.includes(attackMoveName.value)
@@ -1818,7 +1467,6 @@ const confirmAttack = () => {
     isPenalty = true
   }
 
-  // 2. ペナルティがない場合のみ、ポジティブボーナスをチェック
   if (!isPenalty) {
     let isPositive = false
     for (const word of positiveWords.value) {
@@ -1830,7 +1478,6 @@ const confirmAttack = () => {
     if (isPositive) {
       addLog('ポジティブな言葉の力で攻撃が強化された！', 'positive')
       damage = Math.floor(damage * 1.5)
-      // unlockAchievement('positive_warrior') // 実績チェック
       playerBaseStats.value.positiveAttacksUsed++
       unlockAchievement('positive_warrior')
       if (playerBaseStats.value.positiveAttacksUsed >= 25) unlockAchievement('power_word')
@@ -1867,27 +1514,7 @@ const battleback = () => {
   selectedTargetIndex.value = null
 }
 
-// 3. 最終ダメージで敵のHPを減らす
-//   if (multiplier !== 1.0) {
-//     enemy.value.hp = Math.max(0, enemy.value.hp - damage)
-//     addLog(
-//       `${player.value.name} の「${attackMoveName.value}」！ ${enemy.value.name} に ${damage} のダメージ！`,
-//       'player-action',
-//     )
-//   }
-//   // damage = Math.floor(damage * multiplier);
-//   target.hp = Math.max(0, target.hp - damage);
-//   // 4. ペナルティがなければ攻撃履歴に追加
-//   // if (!isPenalty && currentAdventure.value) {
-//   currentAdventure.value.attackHistory.push(attackMoveName.value)
-//   // }
 
-//   isWaitingForInput.value = false
-//   attackMoveName.value = ''
-//   endPlayerTurn()
-// }
-
-// 【追加】魔法選択・実行
 const selectSpell = (spell) => {
   if (player.value.mp < spell.mpCost) {
     addLog('MPが足りない！', 'penalty')
@@ -1907,7 +1534,6 @@ const confirmMagicAttack = () => {
   const spell = selectedSpell.value
   player.value.mp -= spell.mpCost
   addLog(`MPを ${spell.mpCost} 消費した。`)
-  // console.log(playerBaseStats.value.magicattack)
   if (!checkHit(player.value, target)) {
     addLog(`しかし ${spell.name} は ${target.name} には当たらなかった！`)
     if (currentAdventure.value) {
@@ -1925,7 +1551,6 @@ const confirmMagicAttack = () => {
   playerBaseStats.value.attackcount++
   currentAdventure.value.otherattackcount++
 
-  // 属性倍率を計算
   const multiplier = getElementMultiplier(spell.element, target.element)
   if (multiplier > 1.0) {
     addLog('効果は抜群だ！', 'positive')
@@ -1947,52 +1572,15 @@ const confirmMagicAttack = () => {
   endPlayerTurn()
 }
 
-//   if (!magicChant.value.trim()) {
-//     alert('別の考えを入力してください。')
-//     return
-//   }
-//   const target = enemies.value[selectedTargetIndex.value]; // 【変更】選択した敵が対象
-//   const spell = selectedSpell.value;
 
-//   // const spell = selectedSpell.value
-//   player.value.mp -= spell.mpCost
-//   addLog(`MPを ${spell.mpCost} 消費した。`)
-
-//   if (!checkHit(player.value, enemy.value)) {
-//     addLog(`しかし ${spell.name} は当たらなかった！`)
-//     endPlayerTurn()
-//     return
-//   }
-
-//   let damage = spell.power + Math.floor(magicChant.value.length / 2)
-//   damage = Math.round(damage * (1 + (Math.random() - 0.5) * 0.2))
-
-//   enemy.value.hp = Math.max(0, enemy.value.hp - damage)
-//   addLog(
-//     `${player.value.name} は「${magicChant.value}」と唱え、${spell.name}を放った！ ${enemy.value.name} に ${damage} のダメージ！`,
-//     'player-action',
-//   )
-//   const multiplier = getElementMultiplier(spell.element, target.element); // 【追加】属性倍率計算
-//   damage = Math.floor(damage * multiplier); // 【追加】倍率を適用
-//   target.hp = Math.max(0, target.hp - damage);
-
-//   if (currentAdventure.value) {
-//     currentAdventure.value.attackHistory.push(`${magicChant.value}`)
-//   }
-//   endPlayerTurn()
-// }
-// 【追加】アイテム使用
 const useItem = (item) => {
-  // const inventoryItem = playerInventory.value.find((invItem) => invItem.id === item.id)
   if (item.quantity <= 0) return
 
   if (item.effect === 'heal') {
     player.value.hp = Math.min(player.value.maxHp, player.value.hp + item.power)
     addLog(`アイテム「${item.name}」を使った！ HPが ${item.power} 回復した！`, 'positive')
   } else if (item.effect === 'boost') {
-    // 既存の効果をリセット
-    //player.value.boosts = { attack: 0, defense: 0, DEX: 0, evasion: 0, duration: 0 }
-    // 新しい効果を適用
+
     player.value.boosts[item.targetStat] = item.power
     player.value.boosts.duration = item.duration
 
@@ -2003,20 +1591,18 @@ const useItem = (item) => {
   playerInventory.value = playerInventory.value.filter(
     (playerInventory) => playerInventory.quantity > 0,
   )
-  // item.value = item.value.filter((item) => item.quantity > 0)
-  // inventoryItem.quantity -= 1
+  
   endPlayerTurn()
 }
 
-// 【修正】ターン終了時の処理を明確化
 const endPlayerTurn = () => {
   isPlayerTurn.value = false // プレイヤーのターンを終了
   selectedTargetIndex.value = null
   isLogVisible.value = true // ログを表示
-  returnToCommandSelect() // 次のターンのためにUI状態をリセット
+  returnToCommandSelect() 
   checkWinner()
 
-  // バトルが続いていれば、敵のターンを予約
+  
   if (!isBattleOver.value) {
     setTimeout(enemyTurn, 1000)
   }
@@ -2025,18 +1611,16 @@ const endPlayerTurn = () => {
 const enemyTurn = async () => {
   if (isBattleOver.value) return
 
-  // 生きている敵が順番に行動
   for (const enemy of enemies.value) {
     if (enemy.hp > 0 && !isBattleOver.value) {
-      // 途中でバトルが終わったらループ中断
-      await new Promise((resolve) => setTimeout(resolve, 800)) // 次の敵の行動まで少し待つ
+      await new Promise((resolve) => setTimeout(resolve, 800)) 
 
       let message = ''
       if (!checkHit(enemy, player.value)) {
         message = `しかし ${enemy.name} の攻撃は外れた！`
         addLog(message)
       } else {
-        let damage = calculateDamage(enemy, player.value) // 敵の攻撃は属性考慮なし(必要なら追加)
+        let damage = calculateDamage(enemy, player.value)
         if (player.value.isDefending) {
           damage = Math.floor(damage / 2)
           addLog(`しかし ${player.value.name} は防御している！ ダメージが軽減された！`)
@@ -2045,11 +1629,10 @@ const enemyTurn = async () => {
         message = `${enemy.name} の攻撃！ ${player.value.name} は ${damage} のダメージを受けた！`
         addLog(message, 'enemy-action')
       }
-      player.value.isDefending = false // プレイヤーの防御は1回の攻撃で解除される
-      checkWinner() // 敵の攻撃でバトルが終わる可能性もある
+      player.value.isDefending = false
+      checkWinner()
     }
   }
-  // ターン開始時にプレイヤーのバフターン数を減らす
   if (player.value.boosts.duration > 0) {
     player.value.boosts.duration--
     if (player.value.boosts.duration === 0) {
@@ -2058,7 +1641,6 @@ const enemyTurn = async () => {
     }
   }
 
-  // 全ての敵の行動が終わったら、プレイヤーのターンに戻す
   if (!isBattleOver.value) {
     isPlayerTurn.value = true
     setTimeout(() => {
@@ -2067,56 +1649,8 @@ const enemyTurn = async () => {
   }
 }
 
-//   if (isBattleOver.value) return
-//   // ターン開始時にステータス上昇効果のターン数を減らす
-//   if (player.value.boosts.duration > 0) {
-//     player.value.boosts.duration--
-//     if (player.value.boosts.duration === 0) {
-//       player.value.boosts = { attack: 0, defense: 0, DEX: 0, evasion: 0, duration: 0 }
-//       addLog('ステータス上昇効果が切れた。')
-//     }
-//   }
-//   let message = ''
-//   if (!checkHit(enemy.value, player.value)) {
-//     message = `しかし ${enemy.value.name} の攻撃は外れた！`
-//     addLog(message)
-//   } else {
-//     let damage = calculateDamage(enemy.value, player.value)
-//     if (player.value.isDefending) {
-//       damage = Math.floor(damage / 2)
-//       addLog(`しかし ${player.value.name} は防御している！ ダメージが軽減された！`)
-//     }
-//     player.value.hp = Math.max(0, player.value.hp - damage)
-//     message = `${enemy.value.name} の攻撃！ ${player.value.name} は ${damage} のダメージを受けた！`
-//     addLog(message, 'enemy-action')
-//     // player.value.isDefending = false
-//     // checkWinner()
-//     // if (!isBattleOver.value) {
-//     //   isPlayerTurn.value = true
-//     //   setTimeout(() => {
-//     //     isLogVisible.value = false
-//     //   }, 1500)
-//   }
-//   player.value.isDefending = false
-//   checkWinner()
 
-//   // バトルが続いていれば、プレイヤーのターンに戻し、コマンド画面を表示
-//   if (!isBattleOver.value) {
-//     isPlayerTurn.value = true
-//     setTimeout(() => {
-//       isLogVisible.value = false
-//     }, 1500) // ログを読む時間
-//   }
-// }
 
-// const calculateDamage = (attacker, target) => {
-//   const baseDamage = attacker.attack - target.defense / 2
-//   const randomFactor = (Math.random() - 0.5) * 4
-//   const finalDamage = Math.round(baseDamage + randomFactor)
-//   return Math.max(1, finalDamage)
-// }
-
-// 【変更】calculateDamageはボーナス計算を含まない形に戻す（純粋なダメージ計算）
 const calculateDamage = (attacker, target) => {
   const totalAttack = (attacker.attack || 0) + (attacker.boosts?.attack || 0)
   const totalDefense = (target.defense || 0) + (target.boosts?.defense || 0)
@@ -2126,33 +1660,9 @@ const calculateDamage = (attacker, target) => {
 }
 
 const checkWinner = () => {
-  //   if (enemy.value.hp <= 0) {
-  //     isBattleOver.value = true
-  //     didPlayerWin.value = true
-  //     // gameMessage.value = '感情を乗り越えた！'
-  //     addLog(`${enemy.value.name} は消え去った...`, 'system')
-
-  //     // EXP獲得処理
-  //     // const monsterExp = enemy.value.exp || 10 // モンスターがexpを持っていなければ50
-  //     const monsterExp = Math.floor(Math.random() * 6) + 5 // モンスターがexpを持っていなければ50
-  //     playerBaseStats.value.exp += monsterExp
-  //     addLog(`${monsterExp} の経験値を手に入れた！`, 'positive')
-
-  //     // ポップアップを表示する
-  //     isEmotionLogVisible.value = true
-  //   } else if (player.value.hp <= 0) {
-  //     isBattleOver.value = true
-  //     didPlayerWin.value = false
-  //     // gameMessage.value = '感情に飲み込まれた...'
-  //     addLog(`${player.value.name} は倒れた...`, 'enemy-action')
-  //     addLog('焦らず少しずつ進んでみよう', 'positive')
-  //   }
-  // }
-  // 全ての敵のHPが0以下かチェック
   if (enemies.value.length > 0 && enemies.value.every((e) => e.hp <= 0)) {
     isBattleOver.value = true
     didPlayerWin.value = true
-    // gameMessage.value = '🎉 感情を乗り越えた！'
     addLog(`全ての敵を倒した！`)
     playerBaseStats.value.count += 1
 
@@ -2173,9 +1683,7 @@ const checkWinner = () => {
     playerBaseStats.value.gold += totalGold
     addLog(`${totalExp} の経験値と ${totalGold} ゴールドを手に入れた！`, 'positive')
 
-    // unlockAchievement('first_win') // 実績チェック
     playerBaseStats.value.battlesWon++
-    // console.log(playerBaseStats.value.battlesWon)
     unlockAchievement('first_win')
     if (playerBaseStats.value.battlesWon >= 15) unlockAchievement('battle_novice')
     if (playerBaseStats.value.battlesWon >= 70) unlockAchievement('battle_veteran')
@@ -2183,7 +1691,6 @@ const checkWinner = () => {
 
     isEmotionLogVisible.value = true
   } else if (player.value.hp <= 0) {
-    // プレイヤー敗北条件は変更なし
     isBattleOver.value = true
     didPlayerWin.value = false
     gameMessage.value = ''
@@ -2195,13 +1702,11 @@ const checkWinner = () => {
 
 <template>
   <div id="app-wrapper">
-    <!-- <main class="screen-content"> -->
     <div v-if="achievementToast" class="achievement-toast">🏆 実績解除: {{ achievementToast }}</div>
 
     <div v-if="currentScreen === 'login'" class="screen login-screen">
       <h1>キャラクター作成</h1>
-      <!-- <button @click="a">作成</button> -->
-      <!-- <input id="goal-text" type="text" v-model="newGoal.text" placeholder="例: 10分散歩する" /> -->
+ 
       <form @submit.prevent="setPlayerName" class="login-text">
         <div class="form-group">
           <label for="player-name">名前</label>
@@ -2280,10 +1785,7 @@ const checkWinner = () => {
           <label for="goal-text">目標内容</label>
           <input id="goal-text" type="text" v-model="newGoal.text" placeholder="例: 10分散歩する" />
         </div>
-        <!-- <div class="form-row">
-            <label for="goal-exp">獲得EXP</label>
-            <input id="goal-exp" type="number" v-model.number="newGoal.exp" min="1" />
-          </div> -->
+
         <div class="form-row">
           <label for="goal-priority">優先度</label>
           <select id="goal-priority" v-model.number="newGoal.priority">
@@ -2297,7 +1799,6 @@ const checkWinner = () => {
 
       <hr class="divider" />
 
-      <!-- <p>目標を達成して経験値を獲得</p> -->
 
       <div class="sort-buttons">
         <button @click="sortGoals('desc')" :class="{ active: sortOrder === 'desc' }">
@@ -2479,10 +1980,8 @@ const checkWinner = () => {
           @mouseleave="hideTooltip"
           class="inventory-card"
         >
-          <!-- <div v-if="item.quantity >= 1"> -->
           <img :src="item.image" :alt="item.name" class="item-image" />
           <span class="item-name">{{ item.name }} 所持数: {{ item.quantity }} 個</span>
-          <!-- </div> -->
         </div>
       </div>
       <div v-if="tooltipText" class="tooltip-inventory">{{ tooltipText }}</div>
@@ -2508,7 +2007,6 @@ const checkWinner = () => {
               @input="handleEmotionInput(key, $event)"
               class="emtion-number-input"
             />
-            <!-- <span>{{ value }}</span> -->
           </div>
         </div>
       </div>
@@ -2570,16 +2068,7 @@ const checkWinner = () => {
           <div class="battle-log">
             <p v-for="(log, index) in battleLog" :key="index" :class="log.type">{{ log.text }}</p>
           </div>
-          <!-- <div v-if="isBattleOver && !isEmotionLogVisible" class="game-over-message">
-            <h2>{{ gameMessage }}</h2>
-            <button v-if="didPlayerWin" @click="finalizeAdventure" class="win-button">
-              ホームに戻る
-            </button>
-            <button v-else @click="retryBattle" class="lose-button">再挑戦</button>
-          </div>
-          <button v-else-if="Logmanual" @click="toggleLogView" class="return-button">
-            コマンドに戻る
-          </button> -->
+
 
           <div v-if="isBattleOver && !isEmotionLogVisible" class="game-over-message">
             <h2>{{ gameMessage }}</h2>
@@ -2643,9 +2132,6 @@ const checkWinner = () => {
               <button @click="battleback" class="cancel-button">戻る</button>
 
               <div v-if="tooltipPower" class="tooltip-magic">{{ tooltipPower }}</div>
-              <!-- <div v-if="tooltipdescription" class="tooltip-magic">
-                {{ tooltipdescription }}
-              </div> -->
             </div>
 
             <div class="attack-input-form" v-else-if="playerActionState === 'inputting_magic'">
@@ -2748,8 +2234,7 @@ const checkWinner = () => {
     </div>
 
     <div v-else-if="currentScreen === 'lookBack'" class="screen lookback-screen">
-      <!-- <div v-else-if="currentScreen === 'memoryLog'" class="screen memory-log-screen"> -->
-      <!-- <div v-else-if="currentScreen === 'memoryLog'" class="screen memory-log-screen"> -->
+
       <h1>記録</h1>
       <div>記録した回数： {{ playerBaseStats.battlesWon }} 回</div>
 
@@ -2890,7 +2375,6 @@ const checkWinner = () => {
 </template>
 
 <style scoped>
-/* --- グローバルレイアウト --- */
 
 #app-wrapper {
   max-width: 740px;
@@ -2900,23 +2384,13 @@ const checkWinner = () => {
   min-height: 98vh;
   background-color: #f9f9f9;
 }
-/*.screen-content {*/
-/* flex-grow: 1; */
-/* overflow-y: auto; */
-/* padding-bottom: 60px; ナビゲーションバーの高さ分 */
-/* border: 1px solid #000; */
-/*}*/
-/* .screen {
-  padding: 20px;
-} */
 
-/* --- 下部ナビゲーション --- */
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  max-width: 740px; /* #app-wrapperと合わせる */
+  max-width: 740px;
   margin: 0 auto;
   display: flex;
   height: 60px;
@@ -2942,17 +2416,12 @@ const checkWinner = () => {
 }
 
 /* --- ホーム画面 --- */
-/* .home-screen { */
-/* background-color: #fff; */
-/* position: relative; */
-/* } */
+
 .home-layout {
   display: flex;
 
-  /* width: 100%; */
   height: 800px;
   background-image: url('@/assets/bg_natural_sougen.jpg');
-  /* gap: 20px; */
 }
 .home-left {
   flex: 2;
@@ -2980,7 +2449,6 @@ const checkWinner = () => {
   top: 200px;
   width: 500px;
   height: 500px;
-  /* background-color: #eee; */
   border-radius: 8px;
 
   color: #aaa;
@@ -2994,34 +2462,24 @@ const checkWinner = () => {
   /* position: relative; */
 }
 .item-box button {
-  /* width: 100px;
-  height: 100px;
-  border-radius: 100%; */
-  /* background-color: transparent;
-  border: none; */
+
   border-radius: 15px;
 
   cursor: pointer;
 }
-/* .item-box button :hover {
-  color: #000;
-} */
+
 .item-box img {
   width: 60px;
   height: 60px;
   border-radius: 100%;
-  /* position: relative; */
 }
-/* .inventory-name {
-  background-color: #fafafa;
-} */
+
 
 .status-box {
   background-color: #fafafa;
   border: 1px solid #eee;
   padding: 15px;
   border-radius: 8px;
-  /* margin-top: 150px; */
   margin-right: 30px;
 }
 .status-box h3 {
@@ -3042,22 +2500,7 @@ const checkWinner = () => {
 }
 
 /* --- ボタン --- */
-/* .plus-button {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.minus-button {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-} */
+
 .plus-button,
 .minus-button {
   flex-shrink: 0;
@@ -3073,7 +2516,7 @@ const checkWinner = () => {
 }
 
 .plus-button {
-  background-color: #27ae60; /* 緑 */
+  background-color: #27ae60;
 }
 .plus-button:hover {
   background-color: #229954;
@@ -3083,9 +2526,8 @@ const checkWinner = () => {
   cursor: not-allowed;
 }
 
-/* 【追加】マイナスボタンのスタイル */
 .minus-button {
-  background-color: #e74c3c; /* 赤 */
+  background-color: #e74c3c;
 }
 .minus-button:hover {
   background-color: #c0392b;
@@ -3164,17 +2606,9 @@ const checkWinner = () => {
   cursor: pointer;
 }
 
-/* --- フォーム画面共通スタイル --- */
-/* .screen setup-screenn {
-  border: #000;
-  height: 95vh;
-  background-color: ;
-} */
 
 .setup-screen {
-  /* height: 95vh; */
   background-color: #f9f9f9;
-  /* margin-top: 100px; */
 }
 .setup-screen h1 {
   text-align: center;
@@ -3265,7 +2699,6 @@ const checkWinner = () => {
 
 /* --- バトル画面スタイル --- */
 #game-container {
-  /* height: calc(100vh - 60px); */
   border: none;
   border-radius: 0;
   background-color: #000;
@@ -3303,11 +2736,9 @@ const checkWinner = () => {
   max-width: 100%;
   max-height: 250px;
   object-fit: contain;
-  /* margin-bottom を削除 */
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 .enemy-status {
-  /* width: 70%; */
   max-width: 450px;
   padding: 10px;
   border: 2px solid #333;
@@ -3349,8 +2780,7 @@ const checkWinner = () => {
   font-family: 'Courier New', Courier, monospace;
   background-color: rgba(255, 255, 255, 0.9);
   box-sizing: border-box;
-  /* 高さを少し調整してボタンのスペースを確保 */
-  /* height: calc(100% - 60px); */
+
 }
 .player-status {
   flex: 1;
@@ -3361,11 +2791,9 @@ const checkWinner = () => {
   padding: 15px;
   display: flex;
   flex-direction: column;
-  /* justify-content: center; */
 }
 .action-menu {
   flex: 1;
-  /* display: flex; */
   justify-content: center;
   align-items: center;
   border: 2px solid #333;
@@ -3382,16 +2810,14 @@ const checkWinner = () => {
   align-items: center;
   gap: 5px;
   width: 100%;
-  /* padding: 10px 0; ボタンのスペース確保 */
 }
 .targeting-message {
-  /* display: flex; */
   text-align: center;
 }
 
 /* ログを見るボタンのスタイル */
 .log-view-button {
-  background-color: #7f8c8d !important; /* グレー系の色 */
+  background-color: #7f8c8d !important;
   color: white !important;
   border-color: #7f8c8d !important;
 }
@@ -3456,11 +2882,6 @@ const checkWinner = () => {
   background-color: #f44336;
 }
 
-/* .enemy-container.is-targetable {
-  cursor: pointer;
-  transform: translateY(-10px) scale(1.05);
-  box-shadow: 0 0 15px yellow;
-} */
 
 .enemy-container.selected-target {
   outline: 3px solid #ffcc00;
@@ -3485,7 +2906,7 @@ const checkWinner = () => {
   margin-top: 5px;
 }
 
-/* 【追加】MPバーのスタイル */
+/* MPバーのスタイル */
 .hp-bar.mp {
   background-color: #3498db;
 }
@@ -3534,7 +2955,6 @@ const checkWinner = () => {
 }
 
 .attack-input-form {
-  /* display: flex; */
   width: 100%;
 }
 .attack-input-form input {
@@ -3547,11 +2967,10 @@ const checkWinner = () => {
 .attack-input-form button {
   padding: 12px 20px;
 }
-/* 【追加】サブメニューのスタイル */
+/* サブメニューのスタイル */
 .sub-menu {
   width: 100%;
   display: flex;
-  /* justify-content: center; */
   flex-direction: column;
   gap: 10px;
   padding: 10px 0;
@@ -3564,11 +2983,10 @@ const checkWinner = () => {
 .item-image-battle {
   width: 16px;
   height: 15px;
-  object-fit: contain; /* アスペクト比を保つ */
+  object-fit: contain; 
 }
-/* ペナルティログのスタイル */
 .battle-log p.penalty {
-  color: #9b59b6; /* 紫色 */
+  color: #9b59b6; 
   font-style: italic;
   background-color: rgba(249, 231, 250, 0.8);
   border-left: 5px solid #8e44ad;
@@ -3577,7 +2995,6 @@ const checkWinner = () => {
   border-radius: 4px;
 }
 
-/* --- 【変更】目標リスト画面のスタイル --- */
 .goal-screen h1 {
   text-align: center;
   margin-bottom: 20px;
@@ -3587,8 +3004,7 @@ const checkWinner = () => {
   padding-bottom: 60px;
 }
 .divider {
-  /* border: 0;
-  border-top: 2px solid #eee; */
+
   margin: 30px 0;
 }
 
@@ -3745,7 +3161,6 @@ const checkWinner = () => {
   color: #2c3e50;
 }
 
-/* ポップアップのスタイル */
 .popup-overlay {
   position: absolute;
   top: 0;
@@ -3781,7 +3196,6 @@ const checkWinner = () => {
   height: 35px;
 }
 
-/* 冒険の記録画面のスタイル */
 .memory-log-screen h1 {
   text-align: center;
 }
@@ -3829,7 +3243,6 @@ const checkWinner = () => {
   text-align: center;
 }
 
-/* 【追加】記録がない場合のカードスタイル */
 .empty-state-card {
   margin-top: 20px;
   margin: 10px 10px;
@@ -3845,7 +3258,6 @@ const checkWinner = () => {
   margin-bottom: 10px;
 }
 
-/* 【変更】詳細表示ポップアップのスタイル */
 .popup-header {
   text-align: center;
   border-bottom: 2px solid #eee;
@@ -3860,9 +3272,8 @@ const checkWinner = () => {
   color: #777;
 }
 
-/* 詳細表示ポップアップのスタイル */
 .popup-overlay {
-  position: fixed; /* 画面全体を覆う */
+  position: fixed; 
   top: 0;
   left: 0;
   width: 100%;
@@ -3938,66 +3349,7 @@ const checkWinner = () => {
   margin-bottom: 5px;
 }
 
-/* --- 【追加】お店画面のスタイル --- */
-/* .shop-screen h1 {
-  text-align: center;
-}
-.shop-info {
-  text-align: right;
-  font-weight: bold;
-  font-size: 1.1em;
-  margin: 10px 0 20px;
-}
-.item-list {
-  list-style: none;
-  padding: 0px;
-}
-.item-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  margin-bottom: 10px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-.item-details {
-  display: flex;
-  flex-direction: column;
-}
-.item-name {
-  font-weight: bold;
-  font-size: 1.1em;
-}
-.item-desc {
-  font-size: 0.9em;
-  color: #555;
-}
-.item-actions {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-.item-price {
-  font-weight: bold;
-  color: #e67e22;
-}
-.item-actions button {
-  padding: 8px 16px;
-  font-size: 1em;
-  font-weight: bold;
-  color: white;
-  background-color: #2980b9;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.item-actions button:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-} */
-/* --- 【変更】お店画面のスタイル --- */
+/* --- 店画面 --- */
 .shop-screen h1 {
   text-align: center;
 }
@@ -4016,11 +3368,10 @@ const checkWinner = () => {
   text-align: center;
 }
 
-/* グリッドレイアウト */
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3列表示 */
-  gap: 20px; /* カード間の隙間 */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
   height: auto;
   margin: 10px;
 }
@@ -4032,27 +3383,27 @@ const checkWinner = () => {
   border-radius: 8px;
   padding: 15px;
   display: flex;
-  flex-direction: column; /* 要素を縦に並べる */
-  align-items: center; /* 中央揃え */
+  flex-direction: column; 
+  align-items: center;
   text-align: center;
 }
 
 /* アイテム画像 */
 .item-image {
-  width: 80px; /* 画像サイズを固定 */
+  width: 80px; 
   height: 80px;
-  object-fit: contain; /* アスペクト比を保つ */
+  object-fit: contain;
   margin-bottom: 10px;
 }
 
 .item-details {
   margin-bottom: 10px;
-  flex-grow: 1; /* 名前と説明で高さを埋める */
+  flex-grow: 1;
 }
 .item-name {
   font-weight: bold;
   font-size: 1.1em;
-  display: block; /* 改行させる */
+  display: block;
   margin-bottom: 5px;
 }
 .item-desc {
@@ -4067,9 +3418,9 @@ const checkWinner = () => {
 .item-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 価格とボタンを両端に */
-  width: 100%; /* 幅をカードいっぱいに */
-  margin-top: auto; /* カード下部に配置 */
+  justify-content: space-between;
+  width: 100%;
+  margin-top: auto;
 }
 .item-price {
   font-weight: bold;
@@ -4089,15 +3440,13 @@ const checkWinner = () => {
   background-color: #bdc3c7;
   cursor: not-allowed;
 }
-/* 【追加】ステータス上昇テキストのスタイル */
 .boost-text {
-  color: #27ae60; /* 緑色 */
+  color: #27ae60; 
   font-weight: bold;
 }
-/* 【追加】ツールチップのスタイル */
 .tooltip {
   position: absolute;
-  bottom: 10px; /*メニューエリアの下部に配置*/
+  bottom: 10px; 
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.8);
@@ -4107,14 +3456,14 @@ const checkWinner = () => {
   font-size: 0.9em;
   width: 70%;
   text-align: center;
-  pointer-events: none; /* ツールチップ自体がマウスイベントを妨害しないようにする */
+  pointer-events: none;
   z-index: 10;
   box-sizing: border-box;
 }
 
 .tooltip-magic {
   position: absolute;
-  bottom: 20px; /*メニューエリアの下部に配置 */
+  bottom: 20px; 
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.8);
@@ -4124,7 +3473,7 @@ const checkWinner = () => {
   font-size: 0.9em;
   width: 70%;
   text-align: center;
-  pointer-events: none; /* ツールチップ自体がマウスイベントを妨害しないようにする */
+  pointer-events: none;
   z-index: 10;
   box-sizing: border-box;
   white-space: pre-line;
@@ -4132,7 +3481,6 @@ const checkWinner = () => {
 
 .tooltip-inventory {
   position: absolute;
-  /* bottom: 20px; メニューエリアの下部に配置 */
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.8);
@@ -4142,39 +3490,14 @@ const checkWinner = () => {
   font-size: 0.9em;
   width: 40%;
   text-align: center;
-  pointer-events: none; /* ツールチップ自体がマウスイベントを妨害しないようにする */
+  pointer-events: none; 
   z-index: 10;
   box-sizing: border-box;
   white-space: pre-line;
 }
 
 /* 吹き出し本体 */
-/* .tooltip1 { */
-/* position: relative;
-  display: inline-block;
-  margin: 1.5em 0;
-  padding: 7px 10px;
-  min-width: 120px;
-  max-width: 100%;
-  color: #007bff;
-  font-size: 16px;
-  background: #1abc9c; */
-/*position: absolute;
 
-/*bottom: 10px; /*メニューエリアの下部に配置 */
-/*left: 50%;*/
-/*transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 5px;
-  font-size: 0.9em;
-  width: 40%;
-  text-align: center;
-  pointer-events: none; /* ツールチップ自体がマウスイベントを妨害しないようにする */
-/* z-index: 10; */
-/*box-sizing: border-box;*/
-/* } */
 
 .tooltip1::before {
   content: '';
@@ -4185,26 +3508,7 @@ const checkWinner = () => {
   border: 15px solid transparent;
   border-top: 15px solid #3498db;
 }
-/* 吹き出しの「しっぽ」（三角形） */
-/* .tooltip1::after {
-  content: '';
-  position: absolute;
-  top: 100%; /* 吹き出しの下側に配置 */
-/*left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #333 transparent transparent transparent; /* 上向きの三角形 */
 
-/* .tooltip1:after {
-  border-bottom: 12px solid rgba(0, 0, 0, 0.7);
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  top: 12px;
-  left: 5%;
-  content: '';
-  position: absolute;
-} */
 
 .itemshop-screen {
   max-width: 800px;
@@ -4236,7 +3540,7 @@ const checkWinner = () => {
   cursor: pointer;
 }
 
-/* 【追加】名前入力画面のアバタースタイル */
+/* 名前入力画面のアバター */
 .avatar-selector {
   display: flex;
   justify-content: space-around;
@@ -4261,7 +3565,7 @@ const checkWinner = () => {
   box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
 }
 
-/* 【追加】ホーム画面のアバタースタイル */
+/* ホーム画面のアバター */
 .home-profile {
   display: flex;
   flex-direction: column;
@@ -4281,7 +3585,7 @@ const checkWinner = () => {
   margin: 0;
 }
 
-/* 【追加】ステータス画面のアバタースタイル */
+/* ステータス画面のアバター */
 .status-profile {
   display: flex;
   align-items: center;
@@ -4299,7 +3603,7 @@ const checkWinner = () => {
   margin-bottom: 0;
 }
 
-/* 【追加】バトル画面のアバタースタイル */
+/* バトル画面のアバター */
 .player-profile-battle {
   display: flex;
   align-items: center;
@@ -4316,7 +3620,7 @@ const checkWinner = () => {
   margin: 0;
 }
 
-/* 【追加】実績解除トーストのスタイル */
+/* 【実績解除トースト */
 .achievement-toast {
   position: fixed;
   top: 20px;
@@ -4357,20 +3661,18 @@ const checkWinner = () => {
   background-color: #f9f9f9;
 }
 
-/* 【追加】実績画面のスタイル */
+/* 実績画面のスタイル */
 .achievements-screen h1 {
   text-align: center;
 }
 
-/* 【変更】実績画面のスタイルを5列対応に */
 .achievements-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* モバイルは2列 */
+  grid-template-columns: repeat(2, 1fr);
   gap: 15px;
   margin-top: 20px;
 }
 
-/* 画面幅が広い場合(768px以上)は5列にする */
 @media (min-width: 768px) {
   .achievements-grid {
     grid-template-columns: repeat(5, 1fr);
@@ -4379,21 +3681,21 @@ const checkWinner = () => {
 
 .achievement-card {
   display: flex;
-  flex-direction: column; /* 縦並びに変更 */
+  flex-direction: column; 
   align-items: center;
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 15px;
-  opacity: 0.5; /* 未解除は半透明 */
+  opacity: 0.5; 
   transition:
     opacity 0.3s,
     border 0.3s;
-  min-height: 120px; /* 高さを揃える */
+  min-height: 120px; 
 }
 .achievement-card.unlocked {
-  opacity: 1; /* 解除済みは不透明 */
-  border-left: 5px solid #27ae60; /* 解除済みの印 */
+  opacity: 1;
+  border-left: 5px solid #27ae60; 
 }
 .achievement-icon {
   font-size: 2.5em;
